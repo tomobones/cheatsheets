@@ -1133,7 +1133,7 @@ ________________
 	- "put <fileName>" copies local file to server
 	- "get <fileName>" copies server file to local folder
 	- "quit" quit sftp client
-- ftp file transfer protocol
+- ftp file transfer protocol - not secure >>> not available on many systems
 - "mail -s "subject" tomo < test.txt"
 - tmux - multiplex sessions
 		- "tmux" starts tmux server
@@ -1150,9 +1150,13 @@ ________________
 		- "ctrl+b :split-window" splits horizontally
 		- "exit" closes window
 		- "ctrl+b d" detatch from session, letting it run
-
-
-
+- "curl" - tool to transfer data through the network
+	- "curl <url>:<portnumber>" - GET html from url - default portnumber: 80 for http request
+	- "curl -i <url>:<portnumber>" - more informations
+	- "curl -d "postAppendix" <url>:<portnumber>" - POST method with postAppendix
+	- "curl -o example.html https://www.google.de" - output in file with filename example.html
+	- "curl -O https://www.google.de" - output in file
+	- "curl --ftp-ssl -u gsi_7640_1gsi-7640-1 ftp://thomasvogg.de" - explicit ftps connection with (u)ser login
 - "ss" socket stat - former "netstat" datalink statistics
 	- "ss -r"
 	- "ss -nr"
@@ -4446,74 +4450,74 @@ ________________
 #### bokeh - layouts
 
 - arrange multiple plots/contols on a page
-	- rows, columns, nested
+- rows, columns, nested
 
-			from bokeh.layouts import row, column
-			
-			layout = row(p1, p2, p3) # arguments: plots
-			output_file('row.html')
-			show(layout)
-			
-			layout = column(p1, p2, p3)
-			output_file('column.html')
-			show(layout)
-			
-			layout = row(column(p1, p2), p3)
-			output_file('nested.html')
-			show(layout)
-			
-			row2 = column([mpg_hp, mpg_weight], sizing_mode='scale_width')
-			layout = row([avg_mpg, row2], sizing_mode='scale_width')
-			output_file('layout_custom.html')
-			show(layout)
+		from bokeh.layouts import row, column
+		
+		layout = row(p1, p2, p3) # arguments: plots
+		output_file('row.html')
+		show(layout)
+		
+		layout = column(p1, p2, p3)
+		output_file('column.html')
+		show(layout)
+		
+		layout = row(column(p1, p2), p3)
+		output_file('nested.html')
+		show(layout)
+		
+		row2 = column([mpg_hp, mpg_weight], sizing_mode='scale_width')
+		layout = row([avg_mpg, row2], sizing_mode='scale_width')
+		output_file('layout_custom.html')
+		show(layout)
 
-	- grid arrangements
+- grid arrangements
 
-			from bokeh.layouts import gridplot
-			layout = gridplot(
-				[[None, p1], [p2, p3]], # list of rows
-				toolbar_location=None)
-			output_file('nested.html')
-			show(layout)
-			
-	- tabbed layouts
+		from bokeh.layouts import gridplot
+		layout = gridplot(
+			[[None, p1], [p2, p3]], # list of rows
+			toolbar_location=None)
+		output_file('nested.html')
+		show(layout)
+		
+- tabbed layouts
 
-			from bokeh.models.widgets import Tabs, Panel
-			
-			# create panel with title for each tab
-			first = Panel(child=row(p1,p2), title='first')
-			second = Panel(child=row(p3), title='second')
-			
-			# put the panels in a tab object
-			tabs = Tabs(tabs=[first, second])
-			output_file('tabbed.html')
-			show(tabs)
+		from bokeh.models.widgets import Tabs, Panel
+		
+		# create panel with title for each tab
+		first = Panel(child=row(p1,p2), title='first')
+		second = Panel(child=row(p3), title='second')
+		
+		# put the panels in a tab object
+		tabs = Tabs(tabs=[first, second])
+		output_file('tabbed.html')
+		show(tabs)
 
-- linking plots together - eg linked panning - const while int.acting
-	- linking axes
+#### linking plots together - eg linked panning - const while int.acting
+- linking axes
 
-			p3.x_range = p2.x_range = p1.x_range
-			p3.y_range = p2.y_range = p1.y_range
-			
-	- linking selections - data source is shared!
+		p3.x_range = p2.x_range = p1.x_range
+		p3.y_range = p2.y_range = p1.y_range
+		
+- linking selections - data source is shared!
 
-			p1 = figure(
-				x_axis_label='fertility (children per woman)', y_axis_label='female literacy (% population)',
-				tools='box_select,lasso_select')
-			p1.circle(
-				'fertility',
-				'female literacy',
-				source=source)
-			p2 = figure(
-				x_axis_label='fertility (children per woman)', y_axis_label='population (millions)',
-				tools='box_select,lasso_select')
-			p2.circle(
-				'fertility',
-				'population',
-				source=source)
-			layout = row(p1, p2)
-			
-- annotations/guides
+		p1 = figure(
+			x_axis_label='fertility (children per woman)', y_axis_label='female literacy (% population)',
+			tools='box_select,lasso_select')
+		p1.circle(
+			'fertility',
+			'female literacy',
+			source=source)
+		p2 = figure(
+			x_axis_label='fertility (children per woman)', y_axis_label='population (millions)',
+			tools='box_select,lasso_select')
+		p2.circle(
+			'fertility',
+			'population',
+			source=source) # here source is shared!!
+		layout = row(p1, p2)
+		
+#### annotations/guides
 - help relate scale information to the viewer
 	- axes, grids (default on most plots)
 - explain visual encodings that are used
@@ -5992,6 +5996,14 @@ ________________
 		engine.table_names()
 
 
+### introduction to relational databases
+
+- metadata tables (postGre, mySQL, ...)
+	- information_schema.tables # get metadata
+	- information_schema.columns # get metadata
+	- columns: table_schema - eg with value 'public' > user def info
+- tables: core of every database
+	- reduce reduncancies with several tables
 ________________
 <a name="scikit"/>
 ### scikit-learn	
@@ -6791,6 +6803,11 @@ ________________________________
 
 ### git add
 - to be done: https://www.youtube.com/watch?v=tcd4txbTtAY
+
+
+
+
+
 
 ## datacamp tutorial
 
