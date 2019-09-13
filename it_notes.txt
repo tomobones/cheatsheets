@@ -80,6 +80,7 @@ Content
 	- [Shell](#bash_shell)
 	- [Scripting](#bash_scripting)
 	- [Input/Output](#bash_IO)
+	- [Regular Expressions](#bash_regular_expressions)
 	- [Files](#bash_files)
 	- [Aliases](#bash_aliases)
 	- [Directories](#bash_directories)
@@ -251,6 +252,7 @@ ________________________________
 ________________________________
 <a name="linux_bash"/>
 ### Linux - Bash - Shell - Commands
+- options: "-" short options - "--" long options
 difference: internal command (built-in) - external command
 - "type <command>" find out type
 - "type -a <command>" check wether internal command has external duplicate
@@ -322,9 +324,14 @@ ________________
 	- "$PATH" command path - path directories sep by ":" - list of paths to search for commands
 		- change: "PATH = dir:$PATH" or "PATH = $PATH:dir"
 	- "$TERM" info about terminal program
+	- "$PWD"
 	- "$OLDPWD"
 	- "$HOME" home dir
-	- "$SHELL" shell dir
+	- "$SHELL" std shell program
+	- "$EDITOR" std editor
+		- editor: "which editor" >>> link to /usr/bin/editor
+		- ls -l /usr/bin/editor >>> link to /etc/alternatives/editor
+		- ls -l /etc/alternatives/editor >>> /usr/bin/vim.gtk3
 	- "$$" current shell PID
 	- "$(date)" actual time/date
 	- "$PS1" customize Bash/ksh/sh
@@ -395,7 +402,9 @@ ________________
 - "time <command>" returns time processing the command: execution time, user time, systems time
 - "set" set various bash-shell options
 - "logout" - "exit"
-
+- "update-alternatives" - determines std within group of programs with same function
+        - "update-alternatives --get-selection" show all program groups with std entry
+        - "sudo update-alternatives --config editor" menu for std choice
 
 
 ________________
@@ -532,37 +541,64 @@ ________________
 - Lesen großer Textdateien "less" | "more"
 	- "space" fwd | "b" back | "q" quit
 	- search inside file: fwd "/exampleword " or backwd "?exampleword" weiter "n"
+	- less: "v" opens std editor
 - "head file" | "tail file" first/last 10 lines
-	- option -n change number by n
-	- option "tail -f file" follow file: wait for additional data to be appended
+	- "head -n change number by n | neg numbers possible >> last lines
+	- "tail -f file" follow file: wait for additional data to be appended
+	- "tail -1 file" show last line of file
 - "echo" Argument in Std-Output
 	- useful for finding expansions of sh globs/variables
 - "grep" - search lines in files matching a pattern 
 	- "grep <search pattern> <file>" 
-	- option -i case insensitive
-	- option -c counts number of occurancer in file
-	- option -v invert match: returns all lines not matching the pattern
-	- option -n precede output with line numbers
+	- "grep 'money' *"
+	- "grep -i" case insensitive
+	- "grep -c" counts number of occurancer in file
+	- "grep -v" invert match: returns all lines not matching the pattern
+	- "grep -n" precede output with line numbers
+	- "grep -E extRegExp" extended regular expressions - other regular expression types possible - use simple quotation '
 	- mächtigere Alternative: "egrep"
 	- reguläre Ausdrücke: Mächtiger als Wildcard-Ausdrücke zb ".*" für * und "." für ? -> "man grep"
 - "sort" Sortiert Zeilen alphanumerisch
-	- option -n numerisch
-	- option -r reversed
-	- option -b ignore leading whitespace
-	- option -f case insensitive
-	- option -kF sort by key with field number F - e.g. 2nd column
-	- option -u sort unique - no duplicate lines
+	- "sort -n" numerisch
+	- "sort -r" reversed
+	- "sort -b" ignore leading whitespace
+	- "sort -f" case insensitive
+	- "sort -kF" sort by key with field number F - e.g. 2nd column
+	- "sort -u" sort unique - no duplicate lines
 	- eg "sort -bf" 
 - "cut -d: -f2 <fileName>" divide file into fields with sep ":" and print field 2
 - "tr" translates characters, eg "tr a-z A-Z"
 - "wc <fileName>" wordcount
-	- option -l number of lines
+	- "wc -l" number of lines
 - "column <fileName>" formats input to columns
-	- option -t 
-	- option -s specify delimiting characters
+	- "column -t"
+	- "column -s" specify delimiting characters
 - "tee" read from std input | write to std output and files | split output and do several things
 	- "date | tee mylog.log" outputs in file AND in terminal
 	- "date | tee -a mylog.log" append in file
+- "sed" stream editor for filtering and transforming text
+	- "sed 's/Welt/Linux' hallo_welt.txt" substitutes the first 'Welt' with 'Linux' in each line
+	- "sed 's/Welt/Linux/p' print these line on screen | only line with -n flag
+	- "sed 's/Welt/Linux/g' hallo_welt.txt" globale | substitutes all 'Welt' with 'Linux' in each line
+	- "sed 's/Welt/Linux/2' hallo_welt.txt" substitutes 2x 'Welt' with 'Linux' in each line
+	- "sed 's/Welt/Linux/2;s/Hallo/Servus/1' add commands separating them by ';' 
+	- "sed '3d' hallo_welt.txt" deletes 3ed line
+	- "sed '2,3d' hallo_welt.txt" deletes 2nd and 3ed line
+	- "sed '$d' hallo_welt.txt" deletes last line
+	- "sed '/irgendwas/d' hallo_welt.txt" deletes 'irgendwas' in each line
+	- "sed -i" output on screen AND to file (inplace)
+	- "sed -n" no output on screen
+	- "sed -n -E 's/model name(\s*):(.*)@//p' /proc/cpuinfo" - returns processor speed
+	- "sed -n -E 's/model name(\s*):(.*)@(.*)/processor. \2/p' /proc/cpuinfo" - returns processor name
+
+
+
+________________
+<a name="bash_regular_expressions"/>
+- eg https://regexr.com
+- use single quotation marks '...'
+- (.*) . wildcard | * repetition zero or more
+- ([0-9]*) class of numbers | * repetition
 
 ________________
 <a name="bash_files"/>
@@ -572,14 +608,14 @@ ________________
 - types: file (-) | (soft)link (l) | dir (d) | block (b) | character (c) | pipes (p) | sockets (s)
 - last four (block, char, pipes, sockets) > devices /dev/
 - Copy "cp sourceFiles destFile" creates destination if neccesary (-r)
-	- option -r - Rekursiv
-	- option -a - Attribute unverändert
-	- option -i - Interactive mode - asks if something will be overwritten
-- Move "mv", > funktioniert als rename, bewegen, überschreiben
+	- "cp -r" - recursive copying of (several) whole paths with files
+	- "cp -a" - Attribute unverändert
+	- "cp -i" - Interactive mode - asks if something will be overwritten
+- Move "mv", > funktioniert als rename, bewegen, überschreiben - like "cp"
 - Remove "rm"
-	- option -f forces deletion
-	- option -r rekursiv
-	- option -i interactive mode - asks if something will be overwritten
+	- "rm -f" forces deletion
+	- "rm -r" recursive
+	- "rm -i" interactive mode - asks if something will be overwritten
 - Erzeugen "touch"
 - Unterschied zw zwei dateien 
 	- "diff file1 file2"
@@ -606,30 +642,40 @@ ________________
 		- ":diffoff" - To turn off "diff mode"
 - "file file" displays the file-format
 - "string file" returns human readable strings in a file
-- find
-	- option "find dir -name file -print"
-	- option "find dir -maxdepth" maximal depth of subdirectories
-	- option "find dir -name pattern" e.g. patter = "fileNumer*.txt"
-	- option "find -iname pattern" ignores case
-	- option "find -ls"
-	- option "find -type f" -> f|d|l|p...
-	- option "find -mmin -10" modified within last 10 min
-	- option "find -mmin +10" modified over 10 min ago
-	- option "find -mtime -10" modified within last 10 days
-	- option "find -cmin -10"
-	- option "find -amin -10"
-	- option "find -size +2M" -> 2M 5k 3G, + over, - under
-	- option "find -newer file"
-	- option "find -empty" search for empty files
-	- option "find -perm 777"
-	- option "find -exec command {} \;"
+- "find" - good: "find --help"
+	- "find dir" returns all files in this dir
+	- "find dir -name file -print"
+	- "find dir -maxdepth" maximal depth of subdirectories
+	- "find dir -name pattern" e.g. pattern = "fileNumer*.txt" - need quotation to pass * as pattern - alt: \*
+	- "find dir -iname pattern" ignores case
+	- "find dir -ls"
+	- "find dir -type f" -> f|d|l|p...
+	- "find dir -mmin -10" modified within last 10 min
+	- "find dir -mmin +10" modified over 10 min ago
+	- "find dir -mtime -10" modified within last 10 days
+	- "find dir -cmin -10"
+	- "find dir -amin -10"
+	- "find dir -size +2M" -> 2M 5k 3G, + over, - under
+	- logical ops: -and -or -not -o | "find . -size -1M -and -name '*skype*'" - nest by parantheses \( and \)
+	- "find dir -newer file"
+	- "find dir -empty" search for empty files
+	- "find dir \( -type d \( ! -readable \) -prune \) -or \( -iname 'ubuntu*.iso' -print \)  | ! > -not | -prune just consider those | -print just this part will be printed!
+	- "find dir -perm 777"
+	- "find dir -exec command {} \;"
 		- e.g. command = file to execute
 		- e.g. "chown tomoBones:bonesGroup"
 		- placeholder: {] for each of all results
 		- end command: /;
-	- option "find -user tomo" search for files with user "tomo"
-- locate
-	- "locate" not real time but by index -> faster
+	- "find dir -user tomo" search for files with user "tomo"
+	- "find dir -delete" in combination with other options - deletes all found files
+- locate - "locate --help" - wildcard not working > need regular expressions
+	- "locate" not real time but by index -> faster but maybe not actual | find looks on actual device
+	- "locate filename" locates file in subdirectory
+	- "locate -i filename" case insensitive
+	- "locate -r file_number_(.*).jpg" regular expressions
+	- "locate -r -b file_number_(.*).jpg" runs just over basenames - ie file names
+	- "locate --statistics" considers data base with properties
+	- "sudo updatedb"
 - Editor "nano" or "pico"
 	- "ctrl x" exit
 	- ...
@@ -656,52 +702,76 @@ ________________
 	- "../.." Großelternverzeichnis
 - Change Directory "cd"
 	- ohne Argument > home-Verzeichnis
-	- option "cd -" previous path
+	- relative paths "..." - absolute paths "/..."
+	- "cd -" previous path
 - Make Directory "mkdir"
-	- option -p nested directories "mkdir dir1/dir2/dir3"
+	- "mkdir -p" create path - nested directories "mkdir dir1/dir2/dir3"
 - Remove Directory "rmdir"
 	- alternatively: "rm -rf dir"
-- Permanent Working Directory "pwd"
+	- "rmdir -p" deletes empty paths/nested dirs
+- Print Working Directory "pwd"
 - List "ls"
-	- option -l long | option -a all - dot files | -h human readable
-	- option -F assigns in the end "/" for dir | "@" for link
-	- option -t list by time | -r reverse order
-	- option -R recursively
-	- option --color colorize output
-- "tree"
-	- option -d only directories
-	- option -C colorized output
+	- "ls -l" long | option -a all - dot files | -h human readable
+	- "ls -F" assigns in the end "/" for dir | "@" for link | "*" for Executables
+	- "ls -t" list by time | -r reverse order  | -tr reverse time order
+	- "ls -R" shows all directories recursively
+	- "ls --color" colorize output
+	- "ls -h" human readable - prints sizes with easy units easy to read
+	- "ls -i" inode numbers - eg same inode for hard links
+	- "ls *" list all subdirectories
+- "tree" - of current dir
+	- "tree -a" all (hidden) files
+	- "tree -d" only directories
+	- "tree -C" colorized output
 - File "file"
 
 ________________
 <a name="bash_links"/>
 ### links
-- "ln -s target linkname" soft/symbolic link points to filename - pointer
-- no "-s" option: hard link, points to filedata
+- "ln target hardLinkName" hard link pointing to the same target 
+	- same inode! 
+	- only in one partition possible 
+	- only for files possible, not directories
+	- not easy to delete all associated hard links
+- "ln -s target linkname" soft/symbolic link points to target - pointer
+	- also to directories possible
+	- no linkname > file behind targetName will be used locally
 
 ________________
 <a name="bash_archives"/>
 ### archiving/compressing files
-- archives 
-	- eg "tar cvf archive.tar file1 file2 …"
-	- eg "tar xvf archive.tar"
-	- option c create mode
-	- option x extract mode
-	- option t table of content
-	- option v verbose diagnostic output
-	- option f file - followed by the file name
-	- option p while unpacking preserve permissions - not overwrite according "umask"
-	- option z automatically invoke gzip to tarFile for compression
+- tar archives 
+	- "tar -cvf archive.tar file1 file2 …"
+	- "tar -xvf archive.tar"
+	- "tar -tf archive.tar" shows content
+	- "tar -c" create mode - adds all files recursively!
+	- "tar -x" extract mode
+	- "tar -t" table of content
+	- "tar -v" verbose diagnostic output
+	- "tar -f" file - followed by the archive file name
+	- "tar -p" while unpacking preserve permissions - not overwrite according "umask"
+	- "tar -z" automatically invoke gzip to tarFile for de/compression
+	- "tar -j" automatically invoke bzip2 to tarFile for de/compression
+	- "tar -P" use absolute paths
 	- for std-i/o use "-" instead of fileName
+- cpio archives
 - compressed archives .tar.gz or .tgz
 	- gzip single files
-		- "gzip file"
-		- "gunzip file.gz"
+		- "gzip file" compression
+		- "gzip -n" compression intensity 1<=n<=9 default=9
+		- "gzip -d file" decompression
+		- "gunzip file.gz" decompression
 		- "gzcat" concatenate compressed files
 	- "zcat file .tar.gz | tar xvf -"
 		- "zcat" wie "gunzip -dc" d decompression c std-output
 		- good as pipeline: "zcat file.tar.gz | tar -xvf"
 	- "bzip2"|"bunzip2" .bz2 slower, better compression text-files
+		- "bzip2 source" compression
+		- "bzip2 -z source" compression
+		- "bzip2 -n source" compression - compression intensity 1<=n<=9 default=9
+		- "bzip2 -v source" verbose
+		- "bunzip2 source" decompression
+		- "bzip2 -d source" decompression
 	- "xz"|"unxz"
 	- "du" estimates file usage
 		- "du -k" display sizes in kilobytes
@@ -775,54 +845,126 @@ ________________
 ________________
 <a name="bash_user_management"/>
 ### user management
+- normal user "$" - root "#"
+- cal | cal 2018
+- date
+	- "date" show system time
+	- "date <MMDDHHmmYY>" set system time
+- "hostname"
+	- "hostnamectl set-hostname <domain.name>" set name of system
+	- "hostname" show hostname
+	- "hostname -s" show only hostname
+	- "hostname -d" show only domain
 - "who" | "w" who is logged in
+	- "whoami" my username
 - infos about me "id" | "whoami" | "ls -al" check who owns files
-- "groups" resp "id -GnG" | "groups userName"
+- "groups" 
+	- "groups userName1 userName2"
+- "id"- shows properties of (me as) user
+	- "is userName"
+	- "id -GnG" | 
 - permission categories: ugoa -> user | group | other | all
-- Change Modus: "chmod option fileName"
-	- chmod +x | chmod -r recursively in a directory| chmod go+w | x-
+- Change Modus: "chmod option fileName" - change rights for user/group/world wrt to rwx
+	- user u | group g | others/world o | all a
+	- set = | add + | take -
+	- "chmod +x" | "chmod -r recursively in a directory" | "chmod go+w" | "chmod u=rwx,g+w,o-rx file" | "chmod u+w,g-x,o= dir"
+	- "chmod -R" - recursively for all child directories
 	- absolute: sum bits for each user/group/others r=4 w=2 x=1
 	- eg "chmod 755 filename"
-	- default permission: 777 for dir, 666 for files
+- "umask" - defines, what will NOT be set > subtracted from default value
+	- "umask" shows actual umask - what will NOT be set - first numer related to special rights
+	- "umask -S" more readable form what will actually be set
+	- default permission: 777 for dir, 666 for files >>> new progs must make executable EXPLICITLY! eg "chmod a+x script"
 	- good umask to subract: 022 or 002
 	- check with "umask" | "umask -S"
 	- "umask 007" set to different value
-- "chown owner:group dirName"
+- "chown" - set new user:group for file or directory
+	- "chown owner:group fileOrDirName"
+	- "chown owner"
+	- "chown :group"
 - "chgrp groupName fileName" change group of a file
 - "umask 777" changes std mode for files that this user creates
-- "su" User wechseln
+- "su" change user, see below
 - "sudo command" run command as superuser
 	- /etc/sudoers
 	- "sudo -i" interactive session
 	- "sudo !!" run last command with sudo
+	- "sudo su -" start root session 
+	- "sudo su - userName" start session with new userName - doesn't need sudo 
 - change default mode in etc/login.defs UMASK
 - users: "tail /etc/passwd"|"/etc/shaddow"|"/etc/group"|"/etc/skel"
 - "useradd username"
-	- option -m create a home directory
-	- option -d directory path
-	- option -u user id
-	- option -g group id
-	- option -s default shell
-- "passwd" set password
+	- "useradd -m newUser" create a home directory /home/newUser - copies .files from /etc/skel - need homeDir to show in login screen
+	- alt: cp -r /etc/skel /home/newUser | sudo chown -R newUser:newUser /home/newUser
+	- "useradd -d dirPath userName" directory path - eg for system user
+	- "useradd -u 150 userName" sets UID to 150
+	- "useradd -g 2222 userName" set primary group id to '2222'
+	- "useradd -G UID1,groupName2 userName" add user to groups
+	- "useradd -s /bin/bash" default shell
+	- "useradd -c 'this is a commentary for this user'" add a commentary - shows in login screen
+	- "useradd -r systemUserName" - add system user - automatic UID in default range (sth under 1000)
+- "groupadd groupName"
+	- "goupadd -g 2222 groupName" add group with certain GID
+- "passwd" set password - need to set to show user in login screen
 - "userdel"
-- "usermod -L user" lock password of user (with bang "!" in front of password)
-- "usermod -U user" unlock password
+- "groupdel"
+- "usermod"
+	- "usermod -L userName" lock password of user (with bang "!" in front of password)
+	- "usermod -U userName" unlock password
+	- "usermod -s /bin/bash userName" set shell
+	- "usermod -c 'comment' userName" set comment
+	- "usermod -G userGroup1,userGroup2,UID3 userName" add userName to userGroup | names and GIDs may mix
+	- "usermod -g 10000 userName" primary group
 - "newusers"
+- "chage" - settings in /etc/shadow
+	- "chage -l userName" show entries of 'userName' in /etc/shadow
+	- "chage userName" set minPasswdChange, maxPasswdChage, lastPasswdChange, warningBeforeExpiration, deactivationAfterExpiration, expirationDate
+- "adduser" - alternatively to "useradd" - change behavior in /etc/adduser.conf
+- "deluser" - change behavior in /etc/deluser.conf
+	- "deluser --remove-all-files userName" remove all files of userName
+- "getent" - outputs data for users from passwd, group, shadow:
+	- "getent passwd username"
+	- "getent group username"
+	- "getent shadow username"
 
 ________________
 <a name="bash_packet_manager"/>
 ### package manager
-- sources in "etc/apt/source.list
-- ig with sudo rights
+- sources in "etc/apt/source.list - own sources in dir "etc/apt/source.list.d"
+- ig with sudo rights 
+- packages: special archives
 - debian
-	- apt-get upgrade
-	- apt-get update
-	- apt-get install prog1
-	- apt-cache search prog1
-	- add-apt-repository ppa:cassou/emacs
+	- "apt-get upgrade"
+	- "apt-get update"
+	- "apt-get install prog1"
+	- "apt-cache search prog1"
+	- "add-apt-repository ppa:cassou/emacs"
+	- "apt update" - download possible updates - update lists of packet versions
+	- "apt upgrade" - install new versions of packages - does not upgrade if depending on not yet installed packages 
+	- "apt dist-upgrade" installs with all depending software
+	- "apt search KEYWORD"
+- install single packages:
+	- "dpkg -i PATH/something.deb" - will create new list in "etc/apt/source.list.d" - also updated under "apt update" etc - in general add key by "apt-key" - ig must trust package sources
+	- "dpkg -l" shows list of installed packages
+	- "dpkg -l | grep vim"
+- ubuntu
+	- add package source ppa - must trust source
 - arch linux
 	- pacman
-
+- red hat
+	- yum
+	- "yum install epel-release" add package source
+	- "yum install PACKAGE" - ig look if public key is authentic
+	- "yum install URL"
+	- "yum remove PACKAGE"
+	- "yum downgrade PACKAGE" to version before
+	- "yum search KEYNAME"
+- install by source code - README!! - eg
+	- download archive
+	- "./conigure" run script
+	- "make" compile - sometimes need packages make|gcc|g++|automake|cmake
+	- now can be run in this folder - alternatively: install in syste >>>
+	- "sudo make install" maybe collide with package administration (apt)
 ________________
 <a name="bash_processes"/>
 ### processes
@@ -837,11 +979,12 @@ ________________
 	- 4 processes states in cpu: running (R) | sleeping/waitingForNeedsFromParents (S, I) | zombie/finished/waiting2ReturnValues (Z) | stocked/waiting2BeResumed (T)
 	- processes mounted into proc/ filesystem | this is what ps/top/htop uses | directories are PIDs | eg init proc/1/ | don't look to long into the matrix!
 - "ps" - shows status STAT, see above
-	- options "ps -x" show all of your running processes
-	- options "ps -ax" show ALL processes of system
-	- options "ps -u" more detailed info of processes
+	- "ps -x" show all of your running processes
+	- "ps -ax" show ALL processes of system
+	- "ps -u" more detailed info of processes
 		- eg "ps $$ -u" for current shell PID
-	- options "ps -w" full command names
+	- "ps -ef"
+	- "ps -w" full command names
 	- add the PID for specific processes
 	- use | less or | more
 - "top" "top -c" monitoring processes
@@ -849,10 +992,10 @@ ________________
 - "kill -l" list of signal processes - also in "man 7 signal"
 - "kill -option pidnumber"
 	- no option > default "kill -TERM" terminate > CTRL-c
-	- option "kill -n" n signal number or signal name
-	- option "kill -STOP" freeze process
-	- option "kill -CONT" continue
-	- option "kill -KILL" or "kill -9" hard, erzwungener sofortiger Abbruch ohne verzögerung
+	- "kill -n" n signal number or signal name
+	- "kill -STOP" freeze process
+	- "kill -CONT" continue
+	- "kill -KILL" or "kill -9" hard, erzwungener sofortiger Abbruch ohne verzögerung
 - job control:
 	- "CTRL-d": Stoppt momentanen Input im Terminal
 	- "CTRL-z": background > foreground "fg"
@@ -882,11 +1025,27 @@ ________________
 ### editors:
 - change default editor "sudo update-alternatives --config editor"
 - nano
+	- Strg-G - help
+	- Strg-X - quit
+	- Alt-A - select
+	- Strg-K - cut
+	- Strg-U - paste
+	- Alt-U - undo
+	- Strg-W - find
+	- /etc/nanorc: "set regexp" globally activate regular expressions
+	- ~/.nanord:  "set regexp" locally activate regular expressions
+	- synthax highlighting: 
+		- /usr/share/nano/python.nanorc ...
+		- linked over /etc/nanorc: "include '/usr/share/nano/*.nanorc'"
+		- "Alt-Y" de/activate
+	
 - vi - vim - view
 	- "set -o vi" terminal in vim mode
+	- "~/.vimrc" - edit "set ..."
+	- "/usr/share/vim/vim84/colors" color schemes, eg darkblue...
 	- run tutor: "vimtutor"
 	- https://www.washington.edu/computing/unix/vi.html
-	- 3 modes: command-mode | insert-mode | visual mode
+	- 3 modes: command-mode | insert-mode | last-line-mode 
 	- insert mode: by pressing "i"/"a" and leaving by "esc"
 	- command mode
 		- enter command-mode: "esc"
@@ -999,7 +1158,13 @@ ________________
 			- :$           position curser at last line
 			- :set nu      turn on line numbering
 			- :set nonu    turn off line numbering
-			- :help [subcommand] get help
+			- :set nocp    turn off compatible mode
+			- :set ic - :set ignorecase - case sensitive
+			- :set noic - :set noignorecase 
+			- :syntax on/off  (de)activate syntax highlighting
+			- :colorscheme darkblue - change color scheme
+			- :help        get help
+			- :help :[subcommand] get help
 			- !<command>   run bash command in vim
 			- <ctrl>d      runs suggestions for typed characters
 	- visual mode
@@ -1012,7 +1177,9 @@ ________________
 		- "C-h" Help
 		- "C-x C-c" exit
 		- "C-x C-s" save file
+		- "C-x C-f" open (new) file - only ENTER opens folder
 		- "C-h k <key>" describe key
+		- "ALt-x" > "front-lock-mode" activates syntax highlightening
 	- navigation
 		- "C-p" previous line
 		- "C-n" next line
@@ -1020,6 +1187,8 @@ ________________
 		- "C-f" forward one character
 		- "M-f" forward one word
 		- "M-b" backward one word
+		- "M-<" beginning of document
+		- "M->" end of document
 		- "C-a" beginning of line
 		- "C-e" end of line
 	- deletion
@@ -1034,6 +1203,10 @@ ________________
 		- "C-r" start backward search
 	- repeat command
 		- "C-u N <command>" repeat command N times
+	- select
+		- "C-space" start selection
+		- "M-w" copy
+		- "C-q" cut
 - graphical editors:
 	- emacs
 	- gedit - gnome
@@ -1359,8 +1532,6 @@ ________________
 ________________
 <a name="bash_special_functions"/>
 ### special functions
-- cal | cal 2018
-- date
 
 
 
@@ -7216,6 +7387,7 @@ ________________________________
 - "pandoc"
 	- "pandoc presentation.md -t beamer -o presentation.pdf" markdown to presentation
 	- https://www.youtube.com/watch?v=dum7q6UXiCE
+- "pterm" terminal version of putty
 ## (nonshell) programs:
 - "pycharm": ide for python
 - "nginx-full": webserver nginx
@@ -7227,7 +7399,7 @@ ________________________________
 - "qutebrowser" vim-like browser
 	- "open" search or enter web adress
 	- "f" mark all links -> choose name
-
+- "putty" ssh and telnet client
 
 ________________________________
 ENDE
