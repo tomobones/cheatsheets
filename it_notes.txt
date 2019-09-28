@@ -420,11 +420,12 @@ ________________
 <a name="bash_scripting"/>
 Shell Scripting
 
-- run shell script
-	- run in login-shell "source shellScript.sh" or "./shellScript.sh" > use all internal variables | warning: don't exit in the script
-	- "bash shellScript.sh" >> no internal variables "globalized", just run the script
+- file: no ending | .sh
+- run shell script in different ways
+	- run in login-shell "source shellScript.sh" or ". shellScript.sh" > use all internal variables - if vas created/modified in script, also available in login-shell| warning: don't exit in the script
+	- "bash shellScript.sh" >> no internal variables "globalized", just run the script - don't need rights
 	- "source shellScript.sh" >> take existing login shell and add variables to it
-- beginning for kernel "shebang": "#!/bin/bash", "#!/bin/csh", "#!/bin/ksh", "#!/bin/zsh" by "wich bash"
+	- "./shellScript.sh" >> needs x-rights and "shebang": "#!/bin/bash", "#!/bin/csh", "#!/bin/ksh", "#!/bin/zsh" by "wich bash" - for python add "#!/bin/python3" or similar paths: "which python3" - script must be executable: "chmod +x shellScript.sh"
 	- consider: "which bash" -> use std bash
 - others, eg python: "#!/usr/bin/python"
 - return values - ending returns error:
@@ -436,29 +437,93 @@ Shell Scripting
 	- "exit $?" returns value from last statement
 - "# this is a comment"
 - "$#" number of arguments of script
-- "$0" script file name
+- "$0" script file name - ${13} for many digits
 - "$1" - "$n" arguments
 - "$@" array of arguments
+- "$*" all parameters/arguments
+- pass arguments within '...'
+- reference arguments in "..." s.t. shell does not interpret them - or in string "bla $2"
 
 			ourfilename=$0
-			echo $sourfilename
+			echo "source file:" "$sourfilename"
 			
 			num_arguments=$#
-			echo "we have $num_arguments arguments"
+			echo "number of arguments: " "$num_arguments"
 
 			echo "the first three arguments were ${1}, ${2} and ${3}"
 			echo $5 # returns blank line if not defined
 			
+- avoid conflicts with global variables
+
+			path = "TEST" # def local vars with small letters
+			readonly path # def path read only
+
+- read command - "read --help" - std input with pipe "echo 'text' | ./script.sh" or manually
+
+			read 
+			echo "$REPLY"
+
+			read -n 1
+			echo "$REPLY"
+
+			read answer
+			echo "the answer is $answer"
+
+			read answer1 answer2
+			echo "the answer is $answer1 and $answer2"
+
+			# example update
+			echo "shall the packet be updated? (y/n)"
+			read -n 1 ok
+			echo "the answer is: $ok"
+
+- "[" command
+	- "which [" - "type ["
+	- /usr/bin/\[ (need escape slash \)
+	- eg "/usr/bin/\[ 'y' = 'y' \]" pass parameters "'y' = 'y' \]"
+	- outputs 0 or 1 in $?
+	- important in if queries - need blank after "["
+	- variables should be in ""
+	- chain many commands: [ "y" = "y" ] && [ "n" = "n" ]; echo $?; - OR
+	- chain many commands: [ "y" = "y" ] || [ "n" = "n" ]; echo $?; - AND
+- "test" - "test --help" - check file types and compare values - good for if statements
+	- "test -r" exists file and is readable
+	- "test $age -ge 18" greater equal
 - if statement: if [ statement ] then elif elif else fi
 
-			if [condition-is-true];
+			if [ condition-is-true ]; 
 			then
 				<command>
-			elif [condition-2-is-true];
+			elif [ condition-2-is-true ];
 			then
 				<command>
 			else
 				<commands>
+			fi
+
+			if [ condition-is-true ]; then <command>; fi
+
+			# example update
+			if [ "$ok" != "y" ]
+			then
+				exit
+			fi
+
+			# example update
+			if [ "$ok" != "y" ] && [ "$ok" != "Y" ]
+			then
+				exit
+			fi
+
+			# example update with "test"
+			if [ "$ok" != "y" -a "$ok" != "Y" ]
+			then
+				exit
+			fi
+
+			if [ -r ~/.bashrc ] # exists and is readable?
+			then
+				echo "~/.bashrc exists and is readable"
 			fi
 
 - "for arg in cond; do command1 done"
@@ -472,16 +537,36 @@ Shell Scripting
 				echo "$arg"
 			done
 
+			for xyz in {1..5}; do
+				echo "variable: $xyz"
+			done
+
+			for l in $(ls); do
+				echo "the elements: $l"
+			done
+
 - "while"
 
-			while [condition-to-be-true]
+			while [ condition-to-be-true ]
 			do
 				<command>
 			done
 
+			while [ 1 ]
+			do
+				date + "%d.%m.%Y %H:%i:%s"
+				sleep 2
+			done
+
 - functions: 
-	- definition "funcName (var1, var2) {}"
+        - definition: hallo() { echo "Hallo Welt";}; - need blank after "{"
+        - "type hallo" >>> "hallo is a function"
+        - parameters; hallo() { echo $1; echo "Hallo Welt";}; - "hallo 'MAX'"
+        - eg: cpbackup() { cp $1 $1.$(date + "%Y-%m-%d"}
+        - export (f)unction as env variable: "export -f (cpbackup)"
+	- general definition "funcName (var1, var2) {}"
 	- call a function "funcName var1"
+	- return in function different purpose > will be accessable in $? - "return 0" or "return 1"
 - tests: "$str1"="$str2" | "$str1"!="$str2" | -n "$str1" notNull | -z "$str1" null | $int1 -eq $int2 | $int1 -ne $int2 | $int1 -gt $int2 | $int1 -lt $int2 | $int1 -ge $int2 | $int1 -le $int2 | $int1 -st $int2 OLD STYLE: "if [...];"
 -  $int1 == $int2 |  as well < > <= >= != NEW STYLES: "if ((...));"
 - and "||" - or "&&"
@@ -508,6 +593,35 @@ Shell Scripting
 		echo "there are 'wc -l < /etc/group' lines in /etc/group"
 		
 	- convention: underline: some_variable
+- example back up script
+
+		#!/bin/bash
+		folder=~/Desktop
+		to=~/backups
+
+		if [ ! -d "$to" ]; then
+			mkdir "$to"
+		fi
+
+		oldbackups=$(ls ~/backups/ | grep "backup-desktop" | grep -v "$(date + '%Y-%m')")
+		oldmonths=(echo "$oldbackups" | cut -d '-' -f3,4 | sort | uniq)
+
+		for oldmonth in $oldmonths; do
+			echo "consider month: $oldmonth"
+			month_files=$(ls $to/backup-desktop-$oldmonth-*.tar.bz2)
+			to_delete=$(echo "$month_files" | tail -n +2)
+			if [ -n "$to_delete" ]; then
+				rm $to_delete
+			fi
+		done
+
+		filename="backup-desktop-$(date +'%Y-%m-%s')"
+		echo "filename: $filename"
+
+		echo "generating file: $to/$filename.tar.bz2"
+		tar -cjf "$to/$filename.tar.bz2" -C "$folder" .
+
+			
 
 	
 ________________
@@ -1004,7 +1118,12 @@ ________________
 - cal | cal 2018
 - date
 	- "date" show system time
-	- "date <MMDDHHmmYY>" set system time
+	- "date <MMDDHHmmYYYY>" set system time
+	- "hwclock" hardware clock with sudo 
+	- "hwclock --set --date='2019-09-20 10:00:00'"
+	- "hwclock -w" sets hardware clock from curent system time
+	- "hwclock -s" sets system clock from curent hardware clock
+	- "hwclock -c" periodically compare system clock with CMOS clock
 - "hostname"
 	- "hostnamectl set-hostname <domain.name>" set name of system
 	- "hostname" show hostname
@@ -7592,6 +7711,7 @@ ________________________________
 	- "pandoc presentation.md -t beamer -o presentation.pdf" markdown to presentation
 	- https://www.youtube.com/watch?v=dum7q6UXiCE
 - "pterm" terminal version of putty
+- "ccze" colors log files - eg "tail -f /var/log/syslog | ccze"
 ## (nonshell) programs:
 - "pycharm": ide for python
 - "nginx-full": webserver nginx
