@@ -1,0 +1,317 @@
+# c++ udemy course
+
+- minimal program template
+
+    #include <iostream>
+    int main()
+    {
+        getchar(); 
+        return 0;
+    }
+
+- hello world program
+
+    #include <iostream>
+    int main()
+    {
+        /* arrows: redirects stdi/o */
+        std::cout << "Hello World!" << std::endl;
+        getchar(); //closes window
+        return 0;
+    }
+
+- main function in every cpp-program
+- function head and function body
+- separate lines with ";"
+- read code like a book
+- comment with //lineend
+- comment whole line /* something */
+
+    int number1_to_multiplicate; // declaration
+    number1_to_multiplicate = 4; // initialization
+    int number2_to_multiplicate = 3; // decl+init
+    
+- simple operations: +-*/%
+- outpu/input on console
+    
+    #include <iostream>
+    
+    //incl namespace of std lib, dont need to write "std::"
+    using namespace std; 
+
+    // better only include specific functions
+    using std::cout; 
+    using std::endl;
+    using std::cin;
+    int main()
+    {
+        int number_to_square;
+        int result;
+
+        cout << "please enter number to square: ";
+        cin >> number_to_square;
+        result = number_to_square * number_to_square;
+        cout << "result is " << result << endl;
+
+        cin.get(); // for the input "cin"
+        getchar();
+        return 0;
+    }
+
+- data types: float, double, char, bool
+
+    floatingpointnumber1 = 0.0f;
+    floatingpointnumber2 = 0.0;
+    char character1 = 'a';
+    bool statement1 = true;
+    bool statement2 = false;
+
+- viele mehr de.cppreference.com/w/cpp/language/types
+- zb statt int: short 16bit, long 32bit, longlong 64bit, signed, unsigned
+- problems with declarations: double number = 2/3;
+  1. gets value on right side
+  2. div "/" on ints is without residual
+     different from "/" with int and float
+     different from "/" with float and float
+  3. number is zero!
+
+- if cases
+
+    if (number == 6)
+    {
+        cout << endl << "winning!" << endl;
+    }
+    else if (number == 3)
+    {
+        cout << endl << "2nd place!" << endl;
+    else
+    {
+        cout << endl << "loosing!" << endl;
+    }
+
+- if cases without parantheses of only one line
+
+    if (number == 6)
+        cout << endl << "winning!" << endl;
+    else if (number == 3)
+        cout << endl << "2nd place!" << endl;
+    else
+        cout << endl << "loosing!" << endl;
+
+- alternative
+
+    if (number == 6) cout << endl << "winning!" << endl;
+    else if (number == 3) cout << endl << "2nd place!" << endl;
+    else cout << endl << "loosing!" << endl;
+
+- short hand if case
+
+    number == 2 ? cout << endl << "number is 2" : cout << endl << "not 2"; 
+
+- logical operators: || && 
+- boolean valued operations: == != < > <= >=
+
+- switch cases
+
+    char choice;
+    cout << "please choose from a-d: ";
+    cin >> choice;
+    
+    switch (choice)
+    {
+    case 'a': cout << endl << "you choice an a" << endl; break;
+    case 'b': cout << endl << "you choice an b" << endl; break;
+    case 'c': cout << endl << "you choice an c" << endl; break;
+    case 'd': cout << endl << "you choice an d" << endl; break;
+    }
+
+- important: break;
+
+- for loops
+
+    // declare iterator, condition, incremet/decrement
+    for (int i = 0; i < 3; i++)
+    {
+        cout << i+1 << endl;
+    }
+
+- nested loops
+
+    int number = 1;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            cout << number;
+            number++;
+        }
+        cout << endl;
+    }
+
+- while loops
+  in contrast to for loops: just takes condition!
+  end loop with "break;"
+
+    char wants_exit = 'n';
+    while (wants_exit == 'y')
+    {
+        cout << "exit? y/n: " << endl;
+        cin >> wants_exit;
+    }
+
+- do while loop - execution at least one time!
+
+    do
+    {
+        // code
+    } while (number != 4)
+
+- for loop with a while loop
+
+    int i = 0;
+    while (i < 10)
+    {
+        // code
+        i++;
+    }
+
+- functions - no reaturn value!
+
+    void something()
+    {
+        // code
+    }
+
+    something(); // execute function, def before!!!
+
+- functions - return values, parameter
+  one return value
+  many paramters possible
+
+    bool isInCertainState(int number)
+    {
+        // code, process 'number'
+        return currentState;
+    }
+    bool decideSomething;
+    int someNumber = 5;
+    decideSomething = isInCertainState(someNumber);
+
+- functions - parameter
+- def function before execution
+- alternatively: declare function head above main()
+  ie: declaration, execution, definition
+
+    // declaration
+    bool isInCertainStater(int number);
+
+- recursiv functions:
+  e.g. faculty function: n! = (n-1)! * n
+  f(n-1) executed within f(n) until f(1)
+  
+    int factorial(int n)
+    {
+        if (n > 1)
+            return n * factorial(n-1);
+        else
+            return 1;
+    }
+
+    int sum(int n)
+    {
+    if (n > 1)
+        // problem: type too small for big numbers
+        return n + sum(n-1);
+    else
+        return 1;
+    }
+
+    // better, mathematical closed formular!
+    int sum_gauss(int n)                                                               
+    {                                                                                  
+        return (n * (n+1))/2;                                                          
+    } 
+
+    // greatest common devisor
+    int gcd(int a, int b)                                                              
+    {                                                                                  
+        if (a > 0)                                                                     
+            return gcd(b%a, a);                                                        
+        else                                                                           
+            return b;                                                                  
+    }   
+
+- separate header and body file
+- definitions in file.cpp or file.cc
+  as well: '#include "file.h"'
+- declarations in file.h or file.hpp
+  after '#pragma once'
+- include these functions in other .cpp file by
+  '#include "file.h"'
+
+- debugging ideas (here XCode)
+- setting break points, navigate through code
+- procedure steps
+- read stack, values of variables, ...
+- debug navigator: memory, energy, cpu, time
+- i.g. left window
+
+- setting of the (XCode) project
+- include libraries
+- set optimization values
+
+- find and replace
+- regular expressions
+- move to definition
+- view definition
+
+- help > github, stackoverflow
+
+- arrays - start at index 0
+
+    // has to be declared with FIXED length!
+    int numb_array [10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    for (int i = 0; i < 10; i++)
+    {
+
+        // set/get value for an index
+        cout << numb_array[i] << endl;
+    }
+
+    int array_length = sizeof(numb_array) / sizeof(int);
+
+- arrays - n-dimensional
+    
+    // declaration
+    int numbs_array[3][3] = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}};
+    
+    // alternatively
+    int numbs_array_2[3][3] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+                                                                                    
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            cout << "array(i,j) = (" << i << "," << j << ") = " << numbs_array[i][j] << endl;
+        }
+        
+        for (int j = 0; j < 3; j++)
+        {
+            cout << "array(i,j) = (" << i << "," << j << ") = " << numbs_array_2[i][j] << endl;
+        }
+    }
+
+- strings - char arrays
+
+    // fixed length
+    char name[] = {"Tomo Bones"};
+    int name_length = sizeof(name) / sizeof(char);
+    for (int i = 0; i < name_length; i++)
+    {
+        // iteration code
+    }
+
+- pointer and references

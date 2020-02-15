@@ -1,0 +1,654 @@
+networks
+
+
+tcp/ip 5 layer - each packaged
+- physical
+- datalink layer > ethernet, switches
+- network layer > router, internet, ip, client/server
+- transport layer > tcp/udp
+- application layer
+
+basics of  network devices
+- cabels > copper/fiber
+	- copper twisted pair categories: Cat5, Cat5e, Cat6 > avoid cross talk
+	- optical fiber
+- hubs/switches/router - hub: layer 1 - switch: layer 2 - router: layer 3
+	- hub: collision domain - segment where only one device can communicat
+	- switch: sends only to addressed devices
+- routers: between networks - routing tables - global sendings
+	- bgp - border gateway protocol - routers share data > optimize paths
+- servers/clients - individual computer programs on devices 
+
+physical layer
+- moving bits across the layer
+	- connected copper cable carries const electrical charge
+	- modulation: vary voltage of this charge > line coding
+	- encoding digital signals in analogous signals 
+- twisted pair cables: std: 4 pairs - 8 wires 
+	- allow duplex communication: info flow in both directions
+	- full duplex: simultaneously
+	- half duplex: one direction at one time
+- network ports and patch panels
+	- endpoinds: twisted copper: most common port/plug: RJ45
+	- network ports - generally attached to device of computer network
+	- switches: many ports, server/desktops: most times only one
+	- leds ond RJ45 port: 
+		- link led: proper connection to two devices 
+		- activity led: transmission of data
+		- sometimes shows link speed
+
+data link layer
+- ethernet and mac addresses - most widely used data link layer protocol
+	- problem: collision detection in collision domain
+	- csma/cd: carrier sense multiple access / collision detection
+	- determines when communication channels are clear, device is free to transmit data
+	- random time interval to send package again
+	- identify node, message was ment for > mac address: 
+	- media access control - globally unique for each nw device 
+	- 48 bit, 6 octet groups - each 2 hex numbers (1 octet ~ 2 hex numbers)
+	- 1st part: organizational uniquee identifier
+	- 2nd part: vendor assigned (nic cards, interfaces)
+	- destin and source addresses: 23 mac adresses in each ethernet frame
+	- nodes know when package is intended for it
+- unicast, multicast, broadcast
+	- unicast: only intended for one address 
+	- look at least significant bit 1st octet of destination address
+	- 0 > ethernet frame intended for only dest address
+	- 1 > multicast frame > send to all devices on local network segment
+	- config interfaces: white/black list source addr for multicast messages
+	- broadcast: send to each single device on lan via broadcast address
+	- ethernet broadcast: FF:FF:FF:FF:FF:FF
+	- see later: arp - address resolution protocol
+		- communication of layer 2 with layer 3
+- ethernet frame:
+	- data packet - all-encompassing term - not tied to any layer - A>B
+	- represents any single set of binary data sent across network link
+	- ethernet frames - data packets on ethernet level
+		- preamble 8 bytes
+			- 1st 7 bytes: alternating 1s and 0s
+				- buffer between frames
+				- synchronize clocks
+			- 8th byte: sfd start frame delimiter - preamble is over
+		- destination mac address 6 bytes
+		- source mac address 6 bytes
+		- tag 4 bytes - also may be 'vlan tag'
+			- vlan header: indicates vlan frame
+		- ether-type 2 bytes - describe protocol of content
+		- payload - 0-1,500 bytes
+			- contains data on ip/transport/application layer
+		- fcs 4 byte - frame check sequence - check sum for entire frame
+			- calculated by cyclical redundancy check crc
+			- crc: important general concept for data integrity
+			- polynomial devision to yield number repr larger number
+			- compare crc of source vs crc of destination
+
+network layer
+- communicating on small scale: over mac addresses via switches
+	- does not scale well - not able to communicate over distances
+- ip addresses: 
+	- ip4 > 32 bit - 4 octets - each octet: decimal number 0 < n < 256
+	- dotted decimal notation 192.168.178.1
+	- hierarchical order
+	- ip addresses belong to networks, not to devices
+	- static vs dynamic ip addresses
+		- dynamic ip address > by dhcp - most times for clients
+			- dhcp dynamic host config protocol 
+			- assigns ip to device automatically
+		- static ip address - most times reserved for servers
+- ip datagrams, encapsulation
+	- packets of network layer
+	- 1st 32 bits:
+		- version 4 bits - ipv4 ipv6
+		- header length 4 bits - 20 bytes for ipv4 - minimum for ip
+		- service type 8 bits - for quality of service QoS
+		- total length 16 bits - hence maximal 2^16-1 = 65,635 bits
+	- 2nd 32 bits:
+		- identification 16 bits 
+			- group messages together - if larger than 2^16-1 bits
+			- fragment packages
+		- flags: set if datagram may be /has been fragmented 
+		- fragment offset: to put parts together in correct order
+	- 3ed 32 bits:
+		- ttl 8 bits - time to live - avoid misconfigurations/loops
+		- protocol 8 bits - contains transport layer protocol type
+		- header checksum 16 bits
+	- 4th 32 bits: source ip address
+	- 5th 32 bits: destination ip address
+	- 6th 32 bits: options + padding 
+		- options: primarily used for testing purposes
+		- padding: 'knackfolie' ensures that head has correct total size
+- ip address classes
+	- two sections: network id - host id
+	- class ABC networks - 1oct val, 2oct val, 3oct val used for network id 
+	- A range 0-126 - 16 million - starting bits - 0
+	- B range 128-191 - 64000 - starting bits - 10
+	- C range 192-224 - 254	- starting bits - 110
+	- D range 224-239 - N/A
+	- E range 240-255 - N/A
+	- mostly replaced by CIDR - classless inter-domain routing
+- arp - address resolution protocol
+	- discovers the hardware address of a node with a certain ip address
+	- arp table - associate mac and ip addresses
+	- send from/to certain ip address
+		- in case no entry in arp table
+		- broadcast arp message to mac broadcast addr FF:FF:FF:FF:FF:FF
+		- right edge sends arp response with mac address
+		- safe mac address in local arp table
+	- expiration of arp table entries after short amount of time
+- subnetting
+	- example: network classes ABC
+	- gateway router: exit/entry path of networks
+		- get data from outside and deliver to host id
+		- send data outside considering network id
+	- other routers: core routers
+	- networks devided into subnets with own gateway router
+- subnet masks
+	- third concept: network id, host id, subnet id
+	- send to network > subnet > host
+	- subnet masks: 32bit - 4 octetts - dotted decimal notation
+	- example: 9.100.100.100 
+		- binary: 00001001.01100100.01100100.01100100
+		- subnet: 11111111.11111111.11111111.00000000 > 255.255.255.0
+		- last digits: host id > 256 possibilities 
+		- 0:not assigned, 255:broadcast address
+	- example: 9.100.100.100 with subnetmaks 255.255.255.224
+		- subnet: 11111111.11111111.11111111.11100000
+		- notation: 9.100.100.100/27
+		- A:/8 - B:/16 - C:/24
+- basic binary math
+	- notation: base10 base2 base16 - sum over (digit times base to the n)
+	- n bits - represent numbers from 0 to 2^n-1
+	- addition: 0+0=0 - 1+0=1 - 0+1=1 - 1+1=10
+	- OR: 0or0=0 1or0=1 0or1=1 1or1=1
+	- ANd: 0and0=0 1and0=0 0and1=0 1and1=1
+	- ip address exists on the same network > ip AND networkmask
+- CIDR
+	- problem: ofter B (/16) to large but C (/24) to small
+	- cidr: concept of subnetting by using subnet masks to demarcate
+	- demarcate: to set something off 
+	- describes where one network/system ends and another begins
+	- network and subnet id > combined to one 
+	- shorthand "/" notation > cidr notation
+	- example: 9.100.100.100/24
+	- allows for more arbitrary network sizes
+	- example: need two /24 networks >>> /23
+		512 hosts -> 510=512-2 possible addresses
+
+routing
+- basic routing concepts
+	- router: network device: fwds traffic dep on dest addr of that traffic
+	- at least two network interfaces
+	- basic routing: 
+		- 1 receive data package 
+		- 2 examines dest ip 
+		- 3 looks up dest network in routing table
+		- 4 fwds traffic to destination
+- routing tables
+	- basic concept: 4 columns
+		- destination network: ip, subnet mask - or: cidr notation
+		- next hop: ip address that should be intended
+		- total hops: router keeps track of how far away dest is
+		- interface: to take
+	- catch all entry: where non-specified goes
+- interior gateway protocols
+	- routers need to update their tables about shortes paths to dest nws
+	- routing protocols: routers speak to each other - share information
+	- two main categories: interior/exterior gateway protocols
+	- interior gp 
+		- 1: link state routing protocols 
+		- 2: distance-vector protocols
+		- share different kinds of data for a similar job
+		- used by routers to share info within single autonomous systemo		- autonomous system: collection of nws under single nw operator
+	- example: route betw many offices with each LANs
+	- example: many routers employed by isp with national reach scales
+	- exterior gp:
+		- exchange between autonomous systems
+	- distance-vector protocol
+		- older std
+		- list: every known netwok and its hops (distance to nws)
+		- sends list to every neighboring router - list=vector
+		- routers do not know much about state of autonomous system
+		- just have info about immediate neighbours
+	- link state protocol
+		- more sophisticated approach to determine best paths
+		- each router advertises state of the link of each of its ifs
+		- interfaces > connections to routers of other networks
+		- info propagated to every router in autonomous system
+		- every router in sys knows every detail of every router in sys
+		- use info to run complicated algo against it 
+		- get best path to any destination
+		- link state > much memory! much processing power
+- exterior gateway protocols
+	- communicate date btw routers as edges of autonomous system
+	- need to share info across different organizations
+	- key to the internet operating
+	- internet > mesh of autonomous systems
+	- on highest level > need knowledge of autonom sys to propagate trafic
+	- autonom sys > known/def collection of nws
+	- core internet routers > getting data from edge to edge router
+	- IANA internet asigned numbers authority
+		- managed ip address allocation
+		- respons for ASN autonomous system number
+		- asn: numbers asigned to individual autonomous systems 
+		- 32 bit numbers - single decimal number - no split needed
+- non-routable address space
+	- ipv4: 4,294,967,295 many addresses <> 7.5 billion people in 2016
+	- rfc1918 - nat network address translation
+	- 3 ranges of address space
+		- 10.0.0.0/8
+		- 172.16.0.0/12
+		- 192.168.0.0/16 > typically 192.168.178.0 fritzbox
+
+intro to transportation and application layer
+	- transport layer: allows trafic to be directed to specific nw apps
+	- app layer: allows these apps to communicate in a way they understand	
+
+the transport layer
+- multiplexing in transport layer - nodes on the nw have ability to direct traffic towards many different receiving services
+	- demultiplexing - same but as receiving end - taking trafic ending on same node > delivering to proper receiving service
+	- transport layer: de/multiplexing through ports - makes it possible to run several services on one device
+	- port: 16bit number > direct traffic to specific services running on network computer
+	- example: 80 webserver - 10.1.1.100:80 socket number
+	- example: 22 ftp server - 10.1.1.100:21
+- dissection of a tcp segment
+	- tcp segment > tcp header + data section > payload
+	- header: min 20 bytes
+		- 1st 32 bits:
+			- source port 16 bit
+				- hight numbered port
+				- special section: ephemeral ports
+			- destination port 16 bit
+				- typically: 80, 22, ...
+		- 2nd 32 bits: sequence number 32 bit
+				- keeps track of sequences
+		- 3ed 32 bits: acknowledgement number 32 bit
+				- next expected sequence
+		- 4th 32 bits:
+			- header length 4 bit
+				- data offset field
+			- empty 6 bit
+			- control flag 6 bit
+				- six tcp control flags > see later
+			- window 16 bit
+				- specifies range of seq numbers
+				- that might be send before aqun is req
+		- 5th 32 bits:
+			- checksum 16 bit
+				- operates like cs field in ip/ethernet
+			- urgent 16 bit
+				- used in conjunctione with control flag
+				- point out particular segment 
+				- that might be more important than others
+				- not often used
+		- 6th 32 bits:
+			- options 0-16 bit
+				- rarely used - eg flow control protocols
+			- padding: rest
+	- ethernet frame: limited to 1518 bytes 
+- tcp control flags, 3-way-handshake
+	- six tcp control flags:
+	- urg: 1 > urgency, look at field 'urgent' - rarely used
+	- ack: 1 > examin ack field
+	- psh - push: 1 > 
+		- transmitting dev wants receiving dev 
+		- to push currently-buffered data 
+		- to application on receiving end as soon as possible
+	- rst - reset: 1 > 
+		- one of the sides hasn't recovered
+		- from series of missing/malformed segments 
+		- "lets start over from scratch"
+	- syn: 1 > 
+		- when first established tcp connection
+		- makes receiving end examine seq number field
+	- fin: 1 >
+		- transmitting dev doesn't have more data to send
+		- connection can be closed
+	- 3 way handshake - A builds up connection to B
+		- A syn> B - B syn|ack> A - A ack> B
+	- 4 way handshake - B ends connection to B
+		- B fin> A - A ack> B - A fin> B - B ack> A
+- tcp socket states
+	- instantiation of an end-point in a potential tcp connection
+	- instantiation: actual implementation of sth def elsewhere
+	- only get response if program opened socket on this port
+	- tcp sockets exist in lots of states - common ones:
+		- listen: 
+			- tcp socket is ready
+			- listening for incoming connections
+			- on server side only
+		- syn_sent:
+			- synchronization request has been sent
+			- but connection hasn't been established yet
+			- see on client side only
+		- syn_received
+			- socket previously in listen state
+			- has received a syn request and sent syn/ack back
+			- hasn't received final ack from client yet
+			- on server side only
+		- established
+			- tcp connection is in working order
+			- both sides free to send each other data
+			- on client and server side
+		- fin_wait
+			- fin has been send
+			- ack of other end hasn't been received yet
+			- on client and server side
+		- close_wait
+			- connection has been closed at tcp layer
+			- app that opend socket hasnt released hold on sckt 
+			- on client and server side
+		- closed
+			- connection fully terminated
+			- no further communication possible
+			- on client and server side
+		- others...
+			- vary from os to os
+	- tcp is universal - every dev speaking this protocol has to do this
+	- ways to describe states ot the socket: varies from os to os
+	- troubleshooting > take account of os you are using
+- connection-oriented vs connectionless protocols
+	- connection-oriented protocol
+		- establishes connection
+		- ensure that all data has been properly transmitted
+		- connection on transport layer >
+			- every data send is acknowleged
+		- both ends know: 	
+			- which data is definitely (not) delivered
+		- on lower layers many reasons why data cannot be send
+		- only checksums > no guarantee to resend data
+		- sequence numbers > tcp guarantee
+		- disadvantage: lots of overhead, lots of traffic
+	- connectionless protocol
+		- eg udp - user datagram protocol - doesn't rely on conns
+		- udp: set destination port > send packet
+		- streaming video - no overhead - ok to loose some data
+- firewalls
+	- blocks traffic that meets certain criteria
+	- security issues
+	- operate on lots of different layers 
+	- most common on transportation layer
+	- block traffic to certain ports, allow traffic to other ports
+	- programms | devices
+	- in all modern os integrated
+
+application layer
+- lots of protocols
+	- web browser, web server > ms iis, apache, nginx 
+	- ftp...
+- the osi model - open system interconnection model
+	- app | presentation | session | transp | nw | data link | physical
+	- session: 
+		- facilitating communic btw actual app and transp layer
+	- presetation layer: 
+		- ensures encapsul layer data able 2b understood by app-layr
+		- part of os - might handle data encryption or compression
+- all layers working unison
+	- a la tanenbaum
+	- https://www.youtube.com/watch?v=QKfk7YFILws at 2h:26min
+
+			
+network services
+
+name resolution
+- why do we need dns?
+	- translation: ipv4/6 <> name
+	- global, highly distributed network service
+	- resolves strings of letters into ip addresses for you
+	- domain name: term we use for sth to be resolved by dns
+	- distribute data centers across the globe
+- many steps of name resolution
+	- need dns server to be configured
+	- part of the network config: ip, subnetmask, gateway, dns server
+	- 5 primary types of dns servers - servers can ferfill many roles!
+		- caching name servers
+			- provided by isp or local network
+			- purpose: store known domain name lookups 
+			- for certain amount of time 
+			- ttl time to live - configured by owner of domain
+			- caches often used resolutions locally
+		- recursive name servers
+			- most caching name servers = recurs name servers
+			- perform full dns resolution requests
+		- root name servers
+			- responsible for directing queries to tld servers
+			- mostly distributed over the globe via anycast
+			- anycast: technique used to route traffic to different destin's depending on factors like location/congestion/link health
+			- 13 root servers - more 13 authorities
+		- tld name servers
+			- top level domain - last part of any domain name
+			- eg .com .de ...
+			- global distribution of anycast accessible servers
+			- each distribution responsible for each tld
+		- authoritative name servers
+	- full recursive resolution
+		- client calls caching/recursive server
+		- if no caching it performs full recursive resolution
+		- contact root name server -> response: apropr tld server
+		- queries tld name server -> response: apropr name server
+		- queries name server -> response: ip
+		- recursive server sends ip to client
+- dns and udp
+	- reasons of using udp
+		- connectionless
+		- single dns request and response fits in udp
+		- cannot create so much traffic with full resolution
+		- 44 packets (tcp) vs 8 packets (udp)
+	- there exist dns with tcp
+		- if request does not fit into udp package
+
+name resolution in practice
+- resource record types
+	- troubleshooting > need to know dns
+	- dns works with different defined resource record types:
+	- many are very specialized - here: most basic ones
+		- A record: 
+			- most common
+			- used to point a certain domain name
+			- at a certain ipv4 address
+			- most basic use: 
+				- single A-record <> single domain name
+				- single domain name may have multiple A-rec
+				- allows technique: dns round robin
+				- balance big trafic across multiple ips
+			- example: www.microsoft.com
+				- use 10.1.1.1 10.1.1.2 10.1.1.3 10.1.1.4
+				- client receives all 4 domains
+				- order is cycling
+		- AAAA - Quad A record
+			- same with ipv6
+		- CNAME record - canonical name
+			- redirect traffic from one domain to another
+			- microsoft.com > www.microsoft.com
+		- MX record - mail exchange
+			- deliver email to correct record
+		- SRV record - service record
+			- not only mail but different services
+		- TXT record - text
+			- communicate config prefs about nw services
+- anatomy of a domain name
+	- tld top level domain - eg .com 
+		- handled by icann: internet corp for assigned names/numbers
+		- sister of iana -> global ip spaces, global dns system
+	- domain: second part
+		- used to demarcate where control moves from tld name server to an authoritative name server
+		- outside of icann
+	- subdomain: www. www.sub.subsub.domain.com
+	- fully qualified domain name - fqdn
+		- when you combine all parts together
+-  dns zone  
+	- dns zone: hierarchical concept
+	- root servers: responsible for the root zone
+	- tld name server: resp for zone covering its spedific tld
+	- authorative name server: also responsible for specific zone
+		- finer grain zones
+	- zones don't overlap
+	- dns zones: allow for easier control over multiple lvls of a domain
+	- number of resource records in single zone increases > hard 2manage
+	- ease > split up config by multiple zones
+	- configer zones by zone files: 
+	- config files declaring all resource records for a particular zone
+	- contains: soa - start of authority resource recors declaration
+	- soa: declares zone and name of name server that is authorit for it
+	- ns records: indicate other name servers > might be respons for it
+	- reverse lookup zone files:
+		- let dns resolvers ask for an ip 
+		- and get the fqdn associat with it returned
+	- pointer resource record ptr: resolves ip to a name
+
+dynamic host configuration
+- every computer nw config: ip, subnetmask, primary gateway, name server
+- only first varies in single network > dhcp
+- applic layer protocol > automates config process of hosts on a network
+- machines query dhcp server when connecting to network to get config
+- solves problem to choose ip for each machine
+- few std ways dhcp is operating
+	- dynamic allocation - most common
+		- range of ip addresses set aside for client devices
+		- one of these ips is issued to these devices when requested
+	- automatic allocation
+		- range of ip addresses set aside for assignment purposes
+		- server keeps track of assignment in the past
+		- if possible assigns same ip to same machine if possible
+	- fixed allocation
+		- requires a manually specified list of mac address
+		- and their corresponding ips
+		- if not found > fallback > automatic/dynamic/no allocation
+- other possible functions:
+	- assign ntp servers > network time protocol
+	- ...
+
+dhcp in action
+- application layer - helps configuring network layer
+- problem: how can it work without network config?
+- dhcp discovery: process by which client configured to use dhcp attempts to get network config information - 4 steps - dhcp lease
+	- server dhcpdiscovery step 
+		- dhcp sends dhcp discover (broadcast) message
+		- udp source port 68, dest port 67
+		- ip datagram 0.0.0.0:68 > 255.255.255.255:67
+	- dhcpoffer
+		- 192.168.1.1:67 > 255.255.255.255:68
+		- may be discarded by client
+	- dhcprequest
+		- 0.0.0.0:68 > 255.255.255.255:67
+	- dhcpack
+		- 192.168.1.1:67 > 255.255.255.255:68
+- dhcp lease - includes expiration time
+
+network address translation
+- technique instead of defined standard
+- high level, different implementations
+- translates ip into another ip
+- reasons: 
+	- security - by hiding the ip: ip masquerading - one to many nat
+	- limited amount of available ipv4 addresses
+- allows gateway (router/firewall) to rewrite src ip on an outgoing ip datagram while retaining original ip in order to rewrite it into response
+
+nat and the transport layer
+- several techniques
+- one to many nat 
+	- lots of inbound traffic to one ip
+	- need identification for inbound traffic
+	- eg by port preservation: 
+		- source port by client = port used by router
+		- possible: two conns use same port > router choos different
+	- eg by port forwarding
+		- specific dest ports configured
+		- to always be delivered to specific nodes
+
+nat, non-routable address space, limits of ipv4
+- iana > 5 rir's
+	- afrinic
+	- arin -> usa canada caribiean
+	- apnic -> asia, australia, new zealand
+	- lacnic -> south/central america
+	- ripe -> europe, middle east, russia, parts of asia
+- https://en.wikipedia.org/wiki/IPv4_address_exhaustion
+- solution: nat and non-routable address space (rfc1918)
+
+virtual private naetworks
+- securing: firewalls, nat, non-routable address space, ...
+- condition: connect only to local network physically
+- problem: what if you want to connect from outside? -> vpn
+- vpn: 
+	- technology, allows for the extension of private/local nw
+	- to hosts that might not be on that local network
+	- many flavours - acomplish lots of many things
+	- most common use: access network from outside
+- vpn: autonomy protocol - provision access to sth not locally available
+- establish vpn connection <> vpn tunnel -> use vpn client
+	- use therefore virtual interface 
+	- with ip matching the address space of the network 
+	- they established the vpn connection to
+	- sending data out of this virtual interface 
+		> dev can accedss external resources 
+		> like as it was physically connected to private network
+- most vpns work by using payload section of transport layer carrying an encrypted payload that actually contains in its higher second sets of packets the network/transport/application layers of a packet intended to traverse the remote network
+- payload carried to vpns endpoint - all other layers stripped away and disguarded - payload is unencrypted leaving the vpn server with the top 3 layers of the new packet - gets encapsulated with the proper data link information and send out accross the network - process completed in the inverse/oposite
+- strict authentification procedures required > ensure connection by only authorized computers/users 
+- common: two factor authentification: more than just a username and password are required to authenticate - eg short lived numerical token generated by user through specialized piece of hardware/software
+- other functions of vpn
+	- side to side connectivity
+- vpn - general concept, not specific protocol
+
+proxy services
+- server that acts on behalf of a client in order to access another service
+- proxies: sit btw client and servers providing some benefit
+	- anonymity
+	- security
+	- content filtering
+	- increased performance
+	- ...
+- eg gateway routers > is proxy
+- exist on any layer of nw model > here most common ones:
+	- web proxy
+		- used to increase performance
+		- caching web pages
+		- not goog to cache anymore
+		- more common: prevent so to visit sites (for work houers)
+	- reverse proxy
+		- service the might appear to be a single server...
+		- to external clients, but actually represents...
+		- many servers living behind it
+		- used by lots of popular websites with high traffic
+		- load balancing like dns round robin
+		- deal with decription
+	- ...
+
+connection to the internet
+- huge amount of different devices connecting to the internet: 
+- desktops/mobi/laptops/servers/routers/switches/atms/industry/iot
+
+dial-up, modems, point-to-point protocols
+- pstn - public swithed telefone network -> usenet (by some students)
+- infrastructure that already existed!
+- dial-up connection: digital > analog > digital
+- done through devices modem (later: 56k) modulator/demodulator
+
+broadband connection
+- any connectivity technology that isn't dial-up internet
+- links that are always present - don't have to dial/connect
+- t-carrier technologies:
+	- originally invented by at&t 
+	- transmit multiple phone calls over single link
+- here: t-carrier, dsl, cable broadband, fibre connections
+
+t-carrier technology
+- 3h 55min 30sec
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

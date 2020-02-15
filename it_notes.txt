@@ -1,6 +1,10 @@
 ________________________________
 IT - NOTES
 
+:set nu
+  2 :set showbreak=▶▶▶
+
+
 plt.plot(temperature['2010-01'], color='r', label='Temperature')
 dewpoint = weather['DewPoint']
 plt.plot(dewpoint['2010-01'], color='b', label='Dewpoint')
@@ -1020,6 +1024,9 @@ ________________
 	- "gdisk" similar to fdisk > GPT based partitions
 	- "parted" similar to fdisk/gdisk "parted -l" "parted -l <div>"
 	- "diskutil list"
+    - "diskutil mountDisk /dev/disk4"
+    - "diskutil unmountDisk /dev/disk4"
+    - "diskutil eject /dev/disk4"
 - installing a file system:
 	- "mkswap <div>" - see swaps: "cat /proc/swap"
 	- "swapon <div>" - activate swap partition - "swapon -s" show active swaps
@@ -1449,6 +1456,9 @@ ________________
 			- tn           moving forward before next letter "n"
 			- Tn           moving backward before next letter "n"
 			- %            highlights parantheses around curser
+		- SPLIT SCREEN
+			- <ctrl>w v/s  split screen vertically/horizontally
+			- <ctrl>w hjkl navigate
 		- CLOSING AND SAVING A FILE
 			- ZZ           save file and then quit
 			- :w           save file
@@ -1472,6 +1482,11 @@ ________________
 			- :help :[subcommand] get help
 			- !<command>   run bash command in vim
 			- <ctrl>d      runs suggestions for typed characters
+			- :tabnew      new tab
+				gt     go to next tab
+				gT     go to previous tab
+				ngt    go to n-th next tab
+			- :open FILE_PATH
 	- visual mode
 		- navigation: as in insert mode
 - emacs
@@ -1631,6 +1646,7 @@ ________________
 	- "quit" quit sftp client
 - ftp file transfer protocol - not secure >>> not available on many systems
 - "mail -s "subject" tomo < test.txt"
+- "wall 'message'" broadcast message to all users
 - tmux - multiplex sessions
 		- "tmux" starts tmux server
 		- "tmux list-sessions"
@@ -1689,6 +1705,7 @@ ________________
 	- "dhclient wlan0" give this interface an ip address
 - "ip" - show/manipulate routing/devices/policy routing/tunnels - brew iproute2mac
 	- "ip addr" Shows addresses assigned to all network interfaces
+	- "ip address show" shows config of ip address
 	- "ip neigh" Shows the current neighbour table in kernel - pendant for arp: nd neighbour discovery on 2-datalink layer
 	- "ip link" hardware configuration of network
 	- "ip link set x up" Bring up interface x
@@ -1960,6 +1977,7 @@ These are the shortcuts I use in my daily work. If you still need something that
 ________________
 <a name="python_basics"/>
 ### basic ideas
+- "import this" -> philosophy of python
 - distinction: statements, expressions
 - commentaries: starting with "#"
 - be mindful: does action MANIPULATE object or RETURN a new object?
@@ -2233,14 +2251,14 @@ ________________
 		def echo(n):
 			"""Return the inner_echo function."""
 		    
-	    # Define inner_echo
-	    def inner_echo(word1):
-	        """Concatenate n copies of word1."""
-	        echo_word = word1 * n
-	        return echo_word
-	
-	    # Return inner_echo
-	    return inner_echo
+		    # Define inner_echo
+		    def inner_echo(word1):
+			"""Concatenate n copies of word1."""
+			echo_word = word1 * n
+			return echo_word
+		
+		    # Return inner_echo
+		    return inner_echo
 		
 		# Call echo: twice
 		twice = echo(2)
@@ -2315,25 +2333,118 @@ ________________
 			
 	- decorators
 			
-				def new_decorator(func):
-					def wrap_func():
-						print("code here before executing func")
-						func()
-						print("func has been called")
-					return wrap_func
-								
-				@ new_decorator
-				def func_needs_decorator():
-					print("this fct is in need of a decorator")
-					
-				func_needs_decorator() #now this fct is wrapped by decorator_fct
-						
-				# same as doing this:
-				#		def func_needs_decorator():
-				#			print("this fct is in need of a decorator")
-				# 	func_needs_decorator = new_decorator(func_needs_decorator)
-				# 	func_needs_decorator() #is wrapped by decorator
+			def new_decorator(func):
+				def wrap_func():
+					print("code here before executing func")
+					func()
+					print("func has been called")
+				return wrap_func
+							
+			@ new_decorator
+			def func_needs_decorator():
+				print("this fct is in need of a decorator")
 				
+			func_needs_decorator() #now this fct is wrapped by decorator_fct
+					
+			# same as doing this:
+			#		def func_needs_decorator():
+			#			print("this fct is in need of a decorator")
+			# 	func_needs_decorator = new_decorator(func_needs_decorator)
+			# 	func_needs_decorator() #is wrapped by decorator
+
+			# example:
+
+			def my_logger(orig_funct):
+				import logging
+				logging.basicConfig(filename=f'{orig_funct.__name__}.log', level=logging.INFO)
+
+				def wrapper(*args, **kwargs):
+					logging.info(f'Ran with args: {args} and kwargs {kwargs}')
+					return orig_funct(*args, **kwargs)
+
+				return wrapper
+
+			def my_timer(orig_func):
+				import time
+
+				def wrapper(*args, **kwargs):
+					t1 = time.time()
+					result = orig_func(*args, **kwargs)
+					t2 = time.time() - t1
+					print(f'({orig_func.__name__} ran in {t2} sec)
+					return result
+
+				return wrapper
+
+			@my_logger
+			def display_infoi(name, age):
+				print(f'display_info ran with args {name} and {age}')
+			display_info('John', 25)
+
+
+			@my_timer
+			def display_infoi(name, age):
+				print(f'display_info ran with args {name} and {age}')
+			display_info('John', 25)
+
+			# stacked version - doesn't yield wanted result - logging 'wrapper' fct, not 'diplay_info' fct
+
+			@my_logger
+			@my_timer
+			def display_info(name, age):
+				print(f'display_info ran with args {name} and {age}')
+
+			# same as 
+			display_info = my_logger(my_timer(display_info))
+
+			# fix with functools modul - decorate wrapper fct with 'wrap' decorator
+			from functools import wraps
+
+			def my_logger(orig_func):
+				import logging
+				logging.basicConfig(filename=f'{orig_func.__name__}.log', level=logging.INFO)
+
+				@wraps(orig_func)
+				def wrapper(*args, **kwargs):
+					logging.info(f'Ran with args: {args} and kwargs {kwargs}')
+					return orig_func(*args, **kwargs)
+
+				return wrapper
+
+			def my_timer(orig_func):
+				import time
+
+				@wraps(orig_func)
+				def wrapper(*args, **kwargs):
+					t1 = time.time()
+					result = orig_func(*args, **kwargs)
+					t2 = time.time() - t1
+					print(f'({orig_func.__name__} ran in {t2} sec)
+					return result
+
+				return wrapper
+
+				
+	- class decorators
+
+			class decorator_class(object)
+				def __init__(self, original_function):
+					self.original_function = original_function
+				def __call__(self, *args, **kwargs):
+					print(f'call method executed this before self.original_function.__name__{}')
+					return self.original_function(*args, **kwargs)
+
+			@decorator_class()
+			def display():
+				print('display function ran')
+
+			@decorator_class():
+			def display_info(name, age):
+				print(f'display_info ran with args {name} and {age}')
+
+			display()
+			display('John', 25)
+			
 	- dictionaries übergeben:
 
 			def f(**args):
@@ -2487,29 +2598,32 @@ ________________
 		- new line "\n"
 	- string formatting: '%' and string.format() -> https://pyformat.info
 
-				n = 5
-				print("Ich habe " + str(n) + " Hunde")
-				print("I got " + str(n) + " dogs")
-				print("Ich habe {0} Hunde".format(n))
-				
-				translations = {
-				    "number_of_dogs": "Ich habe {0} Hunde"
-				}
-				
-				print(translations["number_of_dogs"].format(n))
-				
-				# new version .format()  
-				print("Ich habe {1} {0}x".format(5, "Katzen"))
-				print("So viele Katzen habe ich: {0:f}".format(5))
-				print("So viele Katzen habe ich: {0:.2f}".format(5))
-				print("Pi hat den Wert: {0:.3f}".format(3.141529))
-				print("Ich habe {num:.3f} {anim}".format(num = 5, anim = "Hunde"))
-				print("Ich habe {x:.3f} {y}".format(x = 5, y = "Hunde"))
-				
-				# old version '%'
-				'mein Lieblingstier ist ein(e) %s' % tierString
-				'%s %s' % ('one', 'two')
-				'%d %d' % (1, 2)
+			n = 5
+			print("Ich habe " + str(n) + " Hunde")
+			print("I got " + str(n) + " dogs")
+			print("Ich habe {0} Hunde".format(n))
+			
+			translations = {
+			    "number_of_dogs": "Ich habe {0} Hunde"
+			}
+			
+			print(translations["number_of_dogs"].format(n))
+			
+			# new version .format()  
+			print("Ich habe {1} {0}x".format(5, "Katzen"))
+			print("So viele Katzen habe ich: {0:f}".format(5))
+			print("So viele Katzen habe ich: {0:.2f}".format(5))
+			print("Pi hat den Wert: {0:.3f}".format(3.141529))
+			print("Ich habe {num:.3f} {anim}".format(num = 5, anim = "Hunde"))
+			print("Ich habe {x:.3f} {y}".format(x = 5, y = "Hunde"))
+
+			# very new version (python 3.6)
+			print(f"Ich haben {number_cats} Katzen")
+			
+			# old version '%'
+			'mein Lieblingstier ist ein(e) %s' % tierString
+			'%s %s' % ('one', 'two')
+			'%d %d' % (1, 2)
 	- raw strings: r"this string ignores all escape characters \n it prints all backslashes" good for regular expressions
 	- string.isupper() - string.islower() - string.isalpha() - string.isalnum() - string.isdecimal() - string.istitle() - string.isspace()
 	- string.upper() - string.lower()
@@ -6761,6 +6875,45 @@ ________
 
 
 
+________
+<a name="python_virtual_environments"/>
+
+        pip install virtualenv
+        
+        mkdir virtual_environments
+        cd virtual_environments
+
+        # create virtual environment
+        virtualenv project1_env
+                
+        # run virtual environment and install packages
+        source project1_env/bin/activate
+        which pip # check which pip is running
+        pip list # check list of virtual environment
+        pip install numpy
+        pip install pytz
+        pip install psutil
+        pip list # check list now        
+
+        # transfer packages in another env
+        pip freeze --local > requirements.txt # takes only local deps
+
+        # exit virtual environment
+        deactivate
+
+        # delete virtual env
+        rm -rf project_env/
+
+        # specific python version
+        virtulaenv -p usr/bin/python2.6 py26_env 
+        which python
+        pip install -r requirements.txt
+        
+
+
+
+
+
 
 
 
@@ -7712,6 +7865,7 @@ ________________________________
 	- https://www.youtube.com/watch?v=dum7q6UXiCE
 - "pterm" terminal version of putty
 - "ccze" colors log files - eg "tail -f /var/log/syslog | ccze"
+- "screenfetch" bash screenshot information tool
 ## (nonshell) programs:
 - "pycharm": ide for python
 - "nginx-full": webserver nginx
