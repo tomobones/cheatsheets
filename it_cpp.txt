@@ -1,5 +1,21 @@
 # c++ udemy course
 
+
+________________________________
+notes
+
+- pointer, array pointer
+- parameters in functions
+  - static with &
+  - by value/reference
+- simple types and its values: char, unsigned char, ...
+  see c++ reference
+
+
+
+________________________________
+# chapter 1 - introduction
+
 - minimal program template
 
     #include <iostream>
@@ -8,6 +24,9 @@
         getchar(); 
         return 0;
     }
+
+
+# chapter 2 - variables and the console
 
 - hello world program
 
@@ -66,8 +85,8 @@
     bool statement1 = true;
     bool statement2 = false;
 
-- viele mehr de.cppreference.com/w/cpp/language/types
-- zb statt int: short 16bit, long 32bit, longlong 64bit, signed, unsigned
+- many more de.cppreference.com/w/cpp/language/types
+- eg int: short 16bit, long 32bit, longlong 64bit, signed, unsigned
 - problems with declarations: double number = 2/3;
   1. gets value on right side
   2. div "/" on ints is without residual
@@ -267,6 +286,8 @@
 
 - help > github, stackoverflow
 
+# chapter 2 - arrays
+
 - arrays - start at index 0
 
     // has to be declared with FIXED length!
@@ -315,3 +336,578 @@
     }
 
 - pointer and references
+
+    int n_number = 4; // normal integer number in stack
+    
+    // declare pointer to int number
+    // contains address, consider * attached to int: "int *"
+    // address lies on stack
+    int *p_number; 
+
+    int *p_number_2 = &n_number // points to int in stack
+    cout << endl << *p_number_2 << endl; // get value of p_number
+    // get value of pointer with "*"
+    // get address of variable in stack with "&"
+
+    // allocate memory in heap for int with value 4
+    int *p_number_3 // declare var in stack for the address
+    p_number_3 = new int{4}; // but address is on stack!! 
+    cout << endl << *p_number_3 << endl;
+    delete p_number_3; // deallocate memory on heap
+    p_number_3 = nullptr; // since old address not valid anymore
+
+    // query before handling with pointers:
+    if (p_number != nullptr) ...
+
+- pass by value
+
+    // pass by value, passes copy of pointer, not identic
+    // passes heap-address
+
+    void f(int *number)
+    {
+        cout << "Heap Inside: " << number << endl;
+        cout << "Stack Inside: " << &number << endl;
+        // addresses in stack are not the same
+        // addresses in heap ARE the same
+        // allocation of a new var in heap
+        // will not be valid outside function
+        // but only for local copy inside function
+
+
+        // example for problems:
+        delete number; //dealloc memory in heap
+        number = new{5}; //alloc mem for local pointer
+        // pointer outside fct has no valid address
+        // example that states: passing pointers by value
+        // yields problems with alloc/dealloc
+    }
+
+    int *p_number;
+    p_number = new int{4};
+
+    f(p_number);
+    cout << "Heap Inside: " << p_number << endl;
+    cout << "Stack Inside: " << &p_number << endl;
+    
+- pass by reference -> "&"
+
+    // pass by reference - passes stack-address
+    // i.g. always better than pass by value
+
+    void f(int* &number)
+    {
+        cout << "Heap Inside: " << number << endl;
+        cout << "Stack Inside: " << &number << endl;
+        // manipulation of this pointer
+        // has global impact
+
+        // here this is no problem:
+        delete number; //dealloc memory in heap
+        number = new{5}; //alloc mem for THE pointer
+    }
+
+    int *p_number;
+    p_number = new int{4};
+
+    f(p_number);
+    cout << "Heap Inside: " << p_number << endl;
+    cout << "Stack Inside: " << &p_number << endl;
+
+- parameter: "const int &value"
+
+    // want to pass by reference an r-value, eg "4"
+    // doesn't work with "int &value"
+    // since "4" has no reference
+    // with this method we may also pass an r-value
+    // ...like "4", in addition to l-values (variables)
+    void some_function(const int &value) 
+    {
+        ...
+    }
+
+- pointer arrays
+
+    // need to pass size 
+    // - pointer array does not know its size
+    // - just points to first element
+    // - "size_of" fct would return size of ONE element
+    // "int *sth" same as "int sth[]"
+    // more detailed: sth[] gets casted to *sth
+    //int array_max(int input_array[], int size)
+    int array_max(int *input_array, int size)
+    {
+        int max_val = INT16_MIN;
+
+        for (int i = 0; i < size; i++)
+        {
+            if (input_array[i] > max_val)
+            {
+                max_val = input_array[i];
+            }
+        }
+        return max_val;
+    }
+
+    int size = 100;
+    int *my_array; // pointer declariert
+    may_array = new int[size]; // alloc memory for pointer
+    // points to memory
+
+    for (int i = 0; i < size; i++)
+    {
+        my_array[i] = i;
+    }
+
+    int max_val = array_max(my_array, size);
+    cout << endl << "Mac Val: " << max_val;
+
+    delete[] my_array;
+    my_array = nullptr;
+
+- parameters for main()
+  pass parameters via debugging features
+  here: a 1 0
+
+    main(int argc, char** argv)
+    {
+        // argc is one more than set: 4
+        // first param is the path of the proj
+
+        // char **: pointer array with entries pointer arrays
+        // casting the 3ed and 4th value:
+        char *input1 = argv[1];
+        int input2 = atoi(arg[2]);
+        bool input3 = atoi(arg[3]);
+    }
+
+- many dim pointer arrays
+
+    const int size_rows = 3;
+    const int size_cols = 3;
+
+    int **matrix;
+    matrix = new int*[size_rows]; // pt array for pts
+    for (int i = 0; i < size_rows; i++)
+    {
+        matrix[i] = new int[size_cols]; // pt array for ints
+
+        for (int j = 0; j < size_cols; j++)
+        {
+            matrix[i][j] = 1;
+        }
+    }   
+
+    // code
+
+    //dealloc whole matrix
+    for (int i = 0; i < size_rows; i++)
+    {
+        delete[] matrix[i];
+        matrix[i] = nullptr;
+    }
+    delete[] matrix;
+    matrix = nullptr;
+
+# chapter 3
+
+- structs
+  just to hold data, several attributes
+  no logic here > therefore use classes
+  mix data types in contrast to array
+
+    struct Film
+    {
+        int year;
+        const char* title;
+        const char* regisseur;
+    }
+
+    // setting syntax: pointer notation
+    Film star_wars_8; // declaration
+    star_wars_8->title = "the last jedi";
+    star_wars_8->regisseur = "Rian Johnson";
+    star_wars_8->year = 2018;
+
+    // pointer to a struct
+    Film* star_wars_7;
+    star_wars_7 = new Film{2015, "the forces awakens", "J.J.Abrams"};
+
+    // w/o pointer
+    Film* star_wars_9;
+    star_wars_9 = new Film{2019, "the rise of skywalter", "J.J.Abrams"};
+    // on the fly, needs to be done if int was 'static'
+
+    // setting syntax: pointer notation
+    std::out << star_wars_7->year << std::endl;
+    std::out << star_wars_7->regisseur << std::endl;
+    std::out << star_wars_7->title << std::endl;
+    
+- namespaces
+  example for namespace: std in std::cout
+
+- namspaces: build your own:
+  may be nested
+  declare functions in .hpp file within namespace as well!!
+
+    namespace Collection
+    {
+        namespace Cinema
+        {
+            struct Film
+            {
+                int year;
+                const char* title;
+                const char* regisseur;
+            }
+        }
+        namespace Television
+        {
+            struct Series
+            {
+                int year;
+                const char* title;
+                const char* regisseur;
+            }
+        }
+    }
+
+    using Sammlung::Kino::Film    
+    using Sammlung::Kino::TV    
+    int main()
+    {
+        Film jumanji{....};
+        Series game_of_thrones{...};
+
+        // alternatively without "using"
+        Sammlung::Kino::Film lord_of_rings{...};
+    }
+
+- enum
+  methode of assign integers to variables
+  here: assign numbers to names
+  making eg enumerations/code more readable
+
+    enum Rights
+    {
+        STUDENT = 1,
+        TUTOR = 2,
+        DOCENT = 3,
+        ADMIN = 4,
+    }
+
+    struct User
+    {
+        int id;
+        Rechte recht;
+    }
+
+    User studen1{108013242, Rights::STUDENT}
+    User studen2{108013345, Rights::STUDENT}
+    User admin1{00800001, Rights::ADMIN}
+       
+    if (student1.rights == Rechte::STUDENT)
+    { 
+        .... 
+    } 
+
+- overloading functions
+  have to differ in at least one parameter
+  
+    int max(const int &a, const int &b)
+    {
+        if (a < b)
+            return b;
+        else
+            return a;
+    }
+
+    double max(const double &a, double int &b)
+    {
+        if (a < b)
+            return b;
+        else
+            return a;
+    }
+
+- defines
+
+    // good to define global variables
+    #define EPSILON 1e-16
+
+    double deveide(const double &a, const double &b)
+    {
+        // never divide by zero!
+        if (b == 0.0)
+        {
+            return a / (b + EPSILON);
+        }
+        else
+        {
+            return a / b;
+        } 
+    }
+
+- const
+  must be declares and initiated in one row
+  can't be modified afterwards
+
+    int length = 3;
+    int arr[length] = { 1, 2, 3 };
+    // error, paramtere must be constant
+    // since the var "length" can be changed
+
+    // 3 ways to use constants:
+    #define LENGTH 3
+    const int length = 3;
+
+    int arr[LENGTH] = { 1, 2, 3 };
+    int arr[3] = { 1, 2, 3 };
+    int arr[length] = { 1, 2, 3 };
+    
+- r-values, l-values
+  r-value variable, l-value variable
+
+    int a = 3;
+    // r-value var right from equal sign 
+    // - evaluated first
+    // - only local, no address in memory
+    // l-value var left from equal sign
+    // - with special address in memory
+
+- different kinds of l-values:
+  -> normal l-value: int a = 3;
+  -> constant l-value: const int b = 3;
+  -> l-value reference: int &c = a; //reference to l-value a
+  -> constant l-value reference: cont int &d = b; 
+
+- possible settings for parameters
+  example by overloading one function
+
+    // rare since don't want copy by value
+    void f(int z) // copy by value, L-Value, pass R- and L-Values
+    {
+        std::cout << z << " " << &z << std::endl << std::endl;
+    }
+
+    void f(int &z) // L-Value reference, no R-Values possible
+    {
+        std::cout << z << " " << &z << std::endl << std::endl;
+    }
+
+    // works for all 4 kind of variables
+    // problem here: can't change value of z
+    // in this case: overwrite with one before
+    void f(const int &z) // const L-Value reference
+    {
+        std::cout << z << " " << &z << std::endl << std::endl;
+    }
+
+    // rare since the one before works as well
+    void f(int &&z) // only for R-Values
+    {
+        std::cout << z << " " << &z << std::endl << std::endl;
+    }
+
+    int main()
+    {
+        int a = 3;
+        const int b = 3;
+        int &c = a;
+
+        std::cout << a << " " << &a << std::endl << std::endl;
+        f(a); //LValue
+
+        std::cout << b << " " << &b << std::endl << std::endl;
+        f(b); //const LValue
+        
+        std::cout << c << " " << &c << std::endl << std::endl;
+        f(c); // LValue reference
+
+        f(4); // RValue - for that parameter "const"
+    }
+
+- casting - differnt ways:
+  1: static cast (c++) -> prefer this one, simpler to read
+  2: c-style casting (c)
+
+    // double -> int
+    double number = 3.14;
+
+    std::cout << "pi: " << number << std::endl;
+    std::cout << "pi: " << static_cast<int>(number) << std::endl; // c++
+    std::cout << "pi: " << (int)number << std::endl;
+    
+  3: dynamic_cast: convert realted class in run-time
+  4: const_cast: cast away constness of object
+  5: reinterpreted_cast: re-interpreted bits of obj pointed to
+
+- casting - other examples
+
+    // ato* functions
+    const char* input = "2"; // string
+    int input_zahl = atoi(input);
+    float input_zahl2 = atof(input);
+    
+- programming project 1
+  end of chapter 3
+  summary of all learned things
+  check this!!
+
+# chapter 4 - std template library
+
+- bjarne stroutsoup:
+  "by default, use vector when you need container"
+
+- vector and vector methods
+  in contrast to arrays: dynamic modification of vectors
+  typical stl container
+
+    #include vector
+    using std::vector; // include namespace
+    
+    vector<int> my_vector; // declaration
+    my_vector.push_back(1);
+    my_vector.push_back(4);
+    // push back bad idea: 
+    // init afterwards means new alloc every time
+
+    //better:
+    vector<int> my_vector(2) // len=2
+    vector<int> my_vector(2, 0) // len=2, entries each =0
+    
+    cout << endl << my_vector[0] << endl;
+    cout << endl << my_vector[1] << endl;
+
+    // declare and init with an initializer
+    vector<double> my_vector_double{ 1.0, 2.5, 3.4 };
+
+   
+    my_vector.at(2) = 10; // initialize n-th element
+    my_vector.capacity(); // returns number of elements
+    my_vector.clear(); // empties vector, zero elements
+    int* p = my_vector.data(); // returns pointer to 1st element
+    ++p // iterate through vector
+    my_vector.size() // returns length of vector
+    my_vector.push_back(5);
+    my_vector.pop_back();
+
+- many dim vectors
+  nested vectors
+
+    vector<vector<int>> my_vector_2d(3, vector<int>(3,1));
+
+    // i++ creates local copy
+    // ++i faster
+    for (int i = 0; i < my_vector_2d.size(); ++i)
+    {
+        for (int j = 0; j < my_vector_2d[i].size(); ++j)
+        {
+            cout << endl << my_vector_2d[i][j] << endl;
+            //cout << endl << my_vector_2d.at(i).at(j)<< endl;
+        }
+    }
+
+- vector algorithms, iterators, sorting, remove
+
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    #include <numeric>
+
+    bool my_sort_compare(int i, int j)
+    {
+        return i < j;
+    }
+
+    bool is_odd(int i)
+    {
+        return  (i%2) == 1;
+    }
+
+    bool is_even(int i)
+    {
+        return  (i%2) == 0;
+    }
+
+    int main()
+    {
+        vector<int> my_vector(1000000, 0)
+        vector<int> my_vector_2;
+
+        // fill instruction
+        std::fill(my_vector.begin(), my_vector.end(), 5);
+
+        // assign instruction
+        my_vector_2.assign(10, 1); // better than puch version
+
+        // iterator for-loop
+        std::vector<int>::iterator it;
+        for (it = my_vector_2.begin(); it != my_vector_2.end(); ++i)
+        {
+            cout << endl << *it;
+            cout << endl << my_vector_2[*it]; // same
+        }
+
+        // sorting vectors
+        std::vector<int> my_vector3(10, 0); 
+        // iota function from "numeric" lib
+        std::iota(my_vector3.begin(), my_vector3.end(), 0); // 0,1,2,3,4...9 
+        std::sort(my_vector3.befin(), my_vector3.end(), my_sort_compare);
+        // passing a function, not executing the function!!
+
+        //erase, remove - remove_if needs function
+        my_vector.erase(std::remove_if(my_vector.begin(), my_vector.end(), is_odd), my_vector.end());
+
+        //erase, remove - remove needs value
+        my_vector.erase(std::remove(my_vector.begin(), my_vector.end(), 3), my_vector.end());
+    } 
+
+- typedef
+  give type a name - to make sense
+  use it in other file > def it in header file > include hpp in new file
+
+    typedef vector<unsigned char> ByteArray;
+    typedef unsigned long int ulong;
+
+    ByteArray b1(10, 0x00);
+
+    typedef unsigned char uchar;
+    typedef vector<uchar> ByteArray;
+
+- auto keyword and iteration
+  auto: compiler chooses type itself
+  no inflational usage!!
+  use if type is not important
+  use if type is obvious
+
+    vector<int> my_vector(5, 0);
+    for (auto it = my_vector.begin(); it != my_vector.end(); ++it)
+    ...
+
+    // short version for a for loop
+    // works for all containers
+    // here with passing the value (w/o &)
+    for (auto val : my_vector) // alt: auto -> int
+    {
+        cout << endl << val;
+    }
+
+    // now no copy but reference!
+    for (auto &val : my_vector) 
+    {
+        cout << endl << val;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+- end
