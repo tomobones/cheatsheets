@@ -4,4 +4,4 @@ My personal notes of several topics within inforamtion technology:
 - Python and several packages
 - SQL
 - Git
-
+- C++
