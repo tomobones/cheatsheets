@@ -10,7 +10,9 @@ notes
   - by value/reference
 - simple types and its values: char, unsigned char, ...
   see c++ reference
-
+- container, data structure, algorithms
+- polymorphism, virtual, pointer, Animal dog = Dog(...)
+  Animal* dog_2 = new Dog("snuff", true);
 
 
 ________________________________
@@ -469,7 +471,7 @@ ________________________________
   pass parameters via debugging features
   here: a 1 0
 
-    main(int argc, char** argv)
+    int main(int argc, char** argv)
     {
         // argc is one more than set: 4
         // first param is the path of the proj
@@ -477,8 +479,8 @@ ________________________________
         // char **: pointer array with entries pointer arrays
         // casting the 3ed and 4th value:
         char *input1 = argv[1];
-        int input2 = atoi(arg[2]);
-        bool input3 = atoi(arg[3]);
+        int input2 = atoi(argv[2]);
+        bool input3 = atoi(argv[3]);
     }
 
 - many dim pointer arrays
@@ -787,10 +789,13 @@ ________________________________
     my_vector.capacity(); // returns number of elements
     my_vector.clear(); // empties vector, zero elements
     int* p = my_vector.data(); // returns pointer to 1st element
+    my_vec.data()[1] // returns 2nd element!
     ++p // iterate through vector
     my_vector.size() // returns length of vector
     my_vector.push_back(5);
     my_vector.pop_back();
+    my_vector.front(); // first entry
+    my_vector.back(); // last entry
 
 - many dim vectors
   nested vectors
@@ -843,7 +848,7 @@ ________________________________
 
         // iterator for-loop
         std::vector<int>::iterator it;
-        for (it = my_vector_2.begin(); it != my_vector_2.end(); ++i)
+        for (it = my_vector_2.begin(); it != my_vector_2.end(); ++it)
         {
             cout << endl << *it;
             cout << endl << my_vector_2[*it]; // same
@@ -853,7 +858,7 @@ ________________________________
         std::vector<int> my_vector3(10, 0); 
         // iota function from "numeric" lib
         std::iota(my_vector3.begin(), my_vector3.end(), 0); // 0,1,2,3,4...9 
-        std::sort(my_vector3.befin(), my_vector3.end(), my_sort_compare);
+        std::sort(my_vector3.begin(), my_vector3.end(), my_sort_compare);
         // passing a function, not executing the function!!
 
         //erase, remove - remove_if needs function
@@ -898,6 +903,1201 @@ ________________________________
     {
         cout << endl << val;
     }
+
+- auto - possibilities in for loops:
+    // 1. auto val : vec -> COPY BY VALUE
+    // 2. auto &val : vec -> CALL BY REFERENCE
+    // 3. const auto &val : vec -> CONST CALL BY REF
+    // 4. const auto val : vec -> CONST COPY BY VALUE
+    // last one not really needed
+    // differences in run time:
+    // allocating copies needs more time/memory
+    // 2 & 3 very efficient
+
+    std::vector<int> vec(10, 0);
+    std::iota(vec.begin(); vec.end(); 1);
+
+    for (int i = 0; i < 10; i++)
+    {
+        std::cout << vec[i] << " " << &vec[i] << std::endl;
+        // &vec[i] has different entries
+        // since it is the original
+    }    
+
+    // 1
+    for (auto val : vec)
+    {
+        std::cout << val << " " << &val << std::endl;
+        // &val for all entries same
+        // since it is local 
+        // and has one and the same address 
+        // can't modify vector here
+        // use: when calculating sth locally w/o mofifying values
+    }
+
+    // 2
+    for (auto &val : vec)
+    {
+        std::cout << val << " " << &val << std::endl;
+        // values can be changed with this method
+        // use: want to calc (not locally) and modify values
+    }
+
+    // 3
+    for (const auto &val : vec)
+    {
+        std::cout << val << " " << &val << std::endl;
+        // values can NOT be changed with this method
+        // don't want local copys and dont't want modification
+    }
+ 
+- strings
+  char arrays
+
+    #include <string>
+    std::string;
+
+    string s = "this is a text";
+    cout << s << endl;
+
+    // find an index - alternative for int:
+    // typedef for bigger integer value: unsigned long long
+    // typical for indices
+    size_t index = s.find("i"); 
+
+    // returns special int if not found: string::npos 
+    if (index != string::npos)
+        cout << index << endl;
+    else
+        cout << "not included" << endl;
+
+- read text from/to files
+
+    #include <fstream>
+
+    std::string str; // for each line
+    std::string text; // for whole text
+    
+    // "input file stream"
+    // open input connection to file
+
+    std::ifstream iffile;
+    iffile.open("file.txt");
+
+    // exclude case "file not found"
+    if(iffile.is_open())
+    {
+        while (std::getline(iffile, str))
+        {
+            text += str + "\n";
+        } 
+        std::cout << text << std::endl;
+    }
+
+    // close connection
+    iffile.close();
+
+- change text (continue code from above)
+
+    // find substring and replace it
+    string text_to_replace = "text";
+    string replacement = "string";
+    size_t index = text.find(text_to_replace);
+    text.replace(index, text_to_replace.length(), replacement);
+    std::cout << text << std::endl;
+
+    // save to new file
+    std::ofstream offile;
+    offile.open("new_file.txt");
+    offile << text;
+    offile.close;
+    
+- string methods:
+  see http://www.kcplusplus.com/reference/string/string
+
+    // reverse find - starts backwards
+    size_t index = text.rfind(text_to_replace);
+
+    // substring
+    size_t index = text.find(string_to_search);
+    std::string substr_search = text.substr(index, string_to_search.length());
+    
+    // replace - see above
+
+    // compare
+    // 0:same 
+    // 1:first differing char of string_1 is bigger
+    // -1:first diff char of string_1 is smalle 
+    int is_same = string_1.compare(string_2);
+
+    // search for regular expressions in string str
+    #include <regex>
+    std::string expression = "something";
+    std::regex regexpression(expression);
+    bool is_matching = regex_match(str, regexpression);
+
+
+- binary/hexadecimal values
+
+    using std::string
+    using std::bitset
+
+    bitset<8> my_byte_1(string("00011101")); // dec 29
+    bitset<8> my_byte_2(string("10010101")); // dec 149
+
+    // bitwise calculations
+    cout << my_byte_1 << endl;
+    cout << my_byte_2 << endl;
+    cout << endl;
+    cout << (my_byte_1 & my_byte_2) << endl; //bin and
+    cout << (my_byte_1 ^ my_byte_2) << endl; //bin xor
+    cout << (my_byte_1 | my_byte_2) << endl; //bin or
+    cout << (my_byte_1 << 8) << endl; //bin translation 8fold
+    cout << (~my_byte_2)2) << endl; //bin negation
+
+    // standard binary
+    unsigned char bin1 = 0b01;
+    unsigned char bin2 = 0b10;
+    unsigned char result = bin1 ^ bin2;
+
+    // hexadecimal
+    unsigned char hex1 = 0x01;
+    unsigned char hex2 = 0xff;
+    unsigned char hex3 = hex1 ^ hex2;
+    cout << endl << std::hex << (int) hex3;
+    
+- example with encryption...
+
+# 6 container
+
+- container class templates
+  several types: http://www.cplusplus.com/reference/stl
+  - sequence containers: 
+    -> values are saved in sequence
+    -> eg vector, array, list
+  - container adaptors: 
+    -> order of processing matters
+    -> eg stack LIFO stack
+    -> eg queue FIFO queue
+  - associative containers
+    -> key-value mapping
+    -> eg set, map
+  to check the differences: 
+  - create instances 
+  - and look at the addresses in memory for each element
+  - perform different methods (push_front ec) and measure time!
+
+- std::array
+  http://www.cplusplus.com/reference/array/array
+  fixed size in contrast to vectors
+  many methods, iterators available
+    
+    #include <array>
+    #include <vector>
+
+    std::vector<int> my_vector(10, 0);
+    std::array<int, 10> my_array; // length must be declared const!!
+    // many methods similar to vectors if making sense
+
+- std::deque
+  similar to vector
+  very fast if deleting in front/back
+  vectors: after "push_back" will be newly allocated
+  vectors: will have more "capacity" than length!
+  vectors: there is no "pop_front" method
+  deque: after "push_back" will NOT be newly allocated
+  deque: there is no "capacity"
+
+    #include <vector>
+    #include <deque>
+
+    std::vector<int> my_vector(10, 0);
+    std::deque<int> my_deque(10, 0);
+    // many methods similar to vectors if making sense
+
+- std::forward_list
+  values are not saved in sequence in memory
+  in sequence: better for performance - can be loaded completely into cache
+  fwd-list: each element knows where its successor is
+  just can iterate fwd!
+  use: when you want to remove elements in between without costs
+
+    #include <forward_list>
+    std::forward_list<int> my_flist;
+    my_flist.assign({1, 2, 3, 4});
+    for (auto it = my_flist.begin(); it != my_flist.end(); it++)
+    {
+        std::cout << &*it << std::endl//
+    }
+
+    my_flist.pop_front(); // fwd-list: rm lists in beginning!
+    my_flist.push_front(); // spirit of fwd-list!
+    my_flist.remove(3); // not typical for fwd-list
+
+    auto it = my_flist.begin();
+    it++
+    my_flist.insert_after(it, 42); // not typical for fwd-list
+    
+- std::list
+  each element knows predecessor and successor
+  also known: double link list
+  use: when remove/append in the middle very very often
+
+    #include <list>
+
+    // methods:
+    std::list<int> my_list;
+    std::list<int> my_list = {1, 2, 3, 4, 5};
+    my_list.front();
+    my_list.back();
+    my_list.push_front(..);
+    my_list.push_back(..);
+    my_list.pop_front(..);
+    my_list.pop_back(..);
+    my_list.size();
+
+    for (auto it = my_list.begin(); it != my_list.end(); it++)
+    {
+        ...
+    }
+
+- data structure and algorithms cheat sheet
+  https://github.com/gibsjose/cpp-cheat-sheet/
+  see: usage, process time, pros/cons
+  also: https://medium.com/@rodrigues.b.nelson/choosing-wisely-c-containers-and-big-oh-complexity-64f9bd1e7e4c
+
+- perform different methods for different data structures
+  and measure time
+
+- now container adaptors:
+
+- std::stack
+  LIFO principle - last in, first out - like files on the desktop
+
+    #include <stack>
+
+    void correct_exam(std::stack<int> &stack)
+    {
+        while(stack.size() > 0)
+        {
+            std::cout << "done with student: " << stack.top() << std::endl;
+            stack.pop();
+        }
+    }
+    
+    std::stack<int> my_stack;
+    my_stack.push(1080131311);
+    my_stack.push(1080131312);
+    my_stack.push(1080131313);
+
+    correct_exam(my_stack); // illustrates LIFO
+
+- std::queue
+  FIFO - like in the mensa!
+
+    #include <queue>
+
+    void traverse_queue(std::queue<int> &queue)
+    {
+        while(queue.size() > 0)
+        {
+            std::cout << "student got his meal: " << queue.front() << std::endl;
+            queue.pop();
+        }
+    }
+
+    std::queue<int> my_queue;
+    my_queue.push(1);
+    my_queue.push(2);
+    my_queue.push(3);
+
+    traverse_queue(my_queue); // illustrates FIFO
+
+- std::priority_queue
+  elements get priority
+
+    #include <queue> // priority_queue
+    #include <vector>
+    #include <functional>
+
+    typedef std::priority_queue<int, std::vector<int>, std::less<int>> priority_queue_less;
+    typedef std::priority_queue<int, std::vector<int>, std::greater<int>> priority_queue_greater;
+
+    void execute(priority_queue_less &pq)
+    {
+        while(!pg.empty())
+        {
+            std::cout << pq.top() << std::endl;
+        }        
+        std:cout << std::endl;
+    }
+
+    void execute(priority_queue_less &pq)
+    {
+        while(!pg.empty())
+        {
+            std::cout << pq.top() << std::endl;
+        }        
+        std:cout << std::endl;
+    }
+
+    std::priority_queue<int> my_pq;
+    // default declaration: default priority queue
+    // saves data in a vector
+    // with less-function
+
+    std::priority_queue<int, std::vector<int>, std::less<int>> my_pq_1;
+    my_pq_1.push(10);
+    my_pq_1.push(11);
+    my_pq_1.push(12);
+
+    std::priority_queue<int, std::vector<int>, std::greater<int>> my_pq_2;
+    my_pq_2.push(20);
+    my_pq_2.push(21);
+    my_pq_2.push(22);
+
+    execute(my_pq_1);
+    execute(my_pq_2);
+
+- std::pair std::tuple
+  modern version of a struct
+  pair: 2 values
+  tuple: many values
+  bring functionality to tuples -> classes...
+
+    #include <tuple>
+    #include <utility> // for pair
+    #include <vector>
+
+    typedef std::tuple<int, std::string, bool> tuple_user;
+
+    void print_pair(std::pair<int, std::string> &pair)
+    {
+        std::cout << std::get<0>(pair) << std::endl;
+        std::cout << std::get<1>(pair) << std::endl;
+        //std::cout << pair.first << std::endl; //alternative
+        //std::cout << pair.second << std::endl; //alternative
+        std::cout << std::endl;
+    }
+
+    void print_tuple(tuple_user &tpl)
+    {
+        std::cout << std::get<0>(tpl) << std::endl;
+        std::cout << std::get<1>(tpl) << std::endl;
+        std::cout << std::get<2>(tpl) << std::endl;
+    }
+
+    void print_students(std::vector<tuple_user> &students)
+    {
+        for (auto &student : students)
+        {
+            print_tuple(student);
+        }
+    }
+
+    tuple_user my_tpl_1(23, "dennis", true),
+    tuple_user my_tpl_2 = std::make_tuple(28, "peter", false);
+
+    print_tuple(my_tpl_1); 
+    print_tuple(my_tpl_2); 
+
+    std::vector<tuple_user> students
+    students.push_back(my_tp_1);
+    students.push_back(my_tp_2);
+
+    std::pair<int, std::string> my_pair1(25, "jean");
+    std::pair<int, std::string> my_pair1 = std::make_pair(25, "tom");
+
+    print_pair(my_pair_1);
+    print_pair(my_pair_2);
+
+- associative container:
+
+- std::map
+  key-value principle "dictionary"
+  sorted binary tree
+  non-sorted: take std::unordered_map
+
+    #include <map>
+
+    void print_map(std::map<std::string, int> &map)
+    {
+        for (const auto &val : map)
+        {
+            // first=key - second=value
+            std::cout << val.first << " " << val.second << std::endl;
+        }
+    }
+
+    std::map<std:.string, int> my_map_1;
+    my_map_1["tomo"] = 25; // if not existing will be created
+    my_map_1["jan"] = 22;
+    my_map_1["jan"] = 25; // key must be unique! no new entry!
+
+    print_map(my_map_1);
+
+    // methods:
+    my_map.empty();
+    my_map.size();
+    my_map["something"];
+    my_map.at("something");
+    my_map.insert("new_key", 5);
+    auto it = my_map_1.find("jan"); // get an iterator!
+
+- std::set
+  contains unique elements
+  binary search tree
+  will be sorted reversely...
+  use: eg to neglect duplicates, consider unique values
+
+    #include <set>
+    #include <algorithm> // set operations
+    #include <iteratot> // inserter fct
+
+    void print_set(std::set<std::string> &set)
+    {
+        for (const auto &val : set)
+        {
+            std::cout << val << std::endl;
+        }
+    }
+
+    std::<std::string> my_set_1;
+    my_set_1.insert("jan");
+    my_set_1.insert("tomo");
+    my_set_1.insert("peter");
+
+    print_set(my_set_1);
+
+    std::<std::string> my_set_2;
+    my_set_2.insert("heidi");
+    my_set_2.insert("maike");
+    my_set_2.insert("tomo");
+
+    print_set(my_set_2);
+
+    // union operations:
+    
+    std::set<std::string> union_set
+    std::set_union(my_set_1.begin(), my_set_1.end(), 
+                   my_set_2.begin(), my_set_2.end(),
+                   std::inserter(union_set, union_set.end());
+    print_set(union_set);
+
+    std::set<std::string> inters_set
+    std::set_intersection(my_set_1.begin(), my_set_1.end(), 
+                          my_set_2.begin(), my_set_2.end(),
+                          std::inserter(inters_set, inters_set.end());
+    print_set(inters_set);
+
+    std::set<std::string> difference_set
+    std::set_difference(my_set_1.begin(), my_set_1.end(), 
+                        my_set_2.begin(), my_set_2.end(),
+                        std::inserter(difference_set, difference_set.end());
+    print_set(difference_set);
+
+    std::set<std::string> symdiff_set
+    std::set_symmetric_difference(my_set_1.begin(), my_set_1.end(), 
+                                  my_set_2.begin(), my_set_2.end(),
+                                  std::inserter(symdiff_set, symdiff_set.end());
+    print_set(symdiff_set);
+
+- comparison: vector vs. list
+
+- iterators
+  kind of pointer with other properties...
+  http://www.cplusplus.com/reference/iterator
+  different types:
+  - Input/Output: most simple - 
+  - Forward: just iterate fwd
+  - Bidirectional: iterate fwd/back
+  - Random Access: with [] brackets, eg in array/string/vector/deque
+
+    #include <iterator>
+
+    std::vector<int> my_vector(5, 0);
+
+    // std fwd iterator [begin, end)
+    // use: when want to modify
+    std::vector<int>::iterator it_begin = my_vector.begin();
+    std::vector<int>::iterator it_end = my_vector.end();
+    
+    for (std::vector<int>::iterator it = it_begin(); it != it_end; ++it)
+    {
+        std::cout << *it << " " << &*it << " " << &it << std:: endl
+    }
+    
+    // const fwd iterator [begin, end)
+    // use: when NOT want to modify
+    std::vector<int>::const_iterator const_it_begin = my_vector.cbegin();
+    std::vector<int>::const_iterator const_it_end = my_vector.cend();
+
+    for (std::vector<int>::const_iterator it = const_it_begin(); it != const_it_end; ++it)
+    {
+        std::cout << *it << " " << &*it << " " << &it << std:: endl
+    }
+    
+    // std bidirectional iterator (end, begin]
+    // same reverse with - it++ means actually lower the "index"
+    // my_vector.rbegin(), my_vector.rend()
+    // my_vector.crbegin(), my_vector.crend()
+    // class: std::vector<int>::reverse_iterator
+    // class: std::vector<int>::const_reverse_iterator
+
+    // eg invert a string
+    const std::string str_reversed(str.crbegin(), str.crend())
+
+    // iterate through string
+    for (std::string::const_iterator it = str.cbegin(); it != str.cend(); ++it){}
+
+    // create substring of a length (int) wrt an iterator it (std::string::const_iterator)
+    std::string substr(it, it+length);
+
+- iterator operations:
+  std::advance
+  std::distance
+  std::prev
+  std::next
+
+    #include <iterator>
+    #include <numeric>
+    #include <vector>
+    #include <list>
+
+    // compare iteration for list and vector
+    std::vector<int> my_vector(5, 0);
+    std::iota(my_vector.begin(), my_vector.end(), 5); // 5, 6, 7, 8, 9
+    std::list<int> my_list(my_vector.begin(), my_vector.end());
+
+    // create iterators on 2nd element
+    std::list<int>::iterator it = my_list.begin();
+    std::advance(it, 3);
+
+    // output of 2th element
+    std::cout << my_vector[3] << std::endl; // 8
+    std::cout << *it << std::endl; // 8
+
+    // distance between 2nd element and the end
+    std::cout << std::distance(it, my_list.end()) << std::endl; // 2
+
+    // previous/next entries
+    std::cout << *std::prev(it) << std::endl; // 7
+    std::cout << *std::prev(it, 2) << std::endl; // 6
+    std::cout << *std::next(it) << std::endl; // 9
+
+- inserster, back_inserter, front_inserter
+
+    std::vector<int> my_vector_1(5, 0);
+    std::iota(my_vector_1.begin(), my_vector_1.end(), 5);
+
+    std::vector<int> my_vector_2(5, 0);
+    std::iota(my_vector_2.begin(), my_vector_2.end(), 10);
+
+    // insert both vectors here:
+    std::vector<int> my_vector_3(0, 0);
+    std::vector<int> my_vector_4(0, 0);
+
+    // inserter(vector, starting_iterator)
+    std::copy(my_vector_1.begin(), my_vector_1.end(),
+              std::inserter(my_vector_3, my_vector_3.end()));
+    std::copy(my_vector_2.begin(), my_vector_2.end(),
+              std::inserter(my_vector_3, my_vector_3.end()));
+
+    std::cout << "starting inserter!" << std::endl;
+    for (const auto &val : my_vector_3)
+        std::cout << val << std::endl;
+    
+    // back inserter (needs container with push_back method!!)
+    std::copy(my_vector_2.begin(), my_vector_2.end(),
+              std::back_inserter(my_vector_4));
+    std::copy(my_vector_1.begin(), my_vector_1.end(),
+              std::back_inserter(my_vector_4));
+    
+    std::cout << "starting inserter!" << std::endl;
+    for (const auto &val : my_vector_4)
+        std::cout << val << std::endl;
+    
+    // front inserter (needs container with push_front method!!)
+    // similar
+
+# chapter 7 - stl algorithms and features
+
+- random numbers
+
+    #include <random>
+
+    // need an random engine/generator
+    // are objects of classes, that generate rnd numbers > see project later
+    // ig pseudo random > are calculated with specific instruction
+    std::default_random_engine gen_1;
+    std::mt19937_64 gen_2(42); // using seed 42
+    std::random_device gen_3; // has no seed, feature of cpu for "real" rnd nums
+
+    // want to sample from a distribution
+    // specify interval
+    std::uniform_int_distribution<int> distr_1(1, 10);
+    std::uniform_real_distribution<double> distr_2(-10.0, 10.0);
+    int number = distr_1(gen_1);
+    cout << number << endl;
+
+- timing with crono
+
+    #include<chrono>
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    start = std::chrono::high_resolution_clock::now();
+    //do something
+    std::chrono::time_point<std::chrono::high_resolution_clock> stop;
+    end = std::chrono::high_resolution_clock::now();
+
+    // get time interval:
+    int elapsed_milliseconds =
+    std::chrono:duration_cast<std::chrono::milliseconds>(end - start).count();
+
+- transform function
+
+    #include <algorithm>
+    #include <functional>
+
+    int increment2(int i)
+    {
+        return i +=2;
+    }
+
+    std::vector<int> vector_1(10, 3);
+    std::vector<int> vector_2(10, 7);
+    std::vector<int> vector_3(10, 0);
+
+    // tranform function c=a+b
+    // transform(range_a_start, range_a_end, range_b_begin, range_c_begin, fct)
+    // warning: all vectors need same length!!!
+    std::transform(vector_1.begin(), vector_1.end(),
+            vector_2.begin(), vector_3.begin(), 
+            std::plus<int>()); //optional: lambda expression
+
+    // increment each value of vector_1 and save inplace
+    std::transform(vector_1.begin(), vector_1.end(),
+            vector_1.begin(), increment2);
+
+- clamp function - since c++ 17 - very modern
+
+    // cut values in vector to range [0,128]
+    // specify min and max in the function
+    std::vector<int> vector_3(10, 256);
+    for (int i = 0; i != vextor_c.size(); ++i)
+    {
+        vector_3[i] = std::clamp(vector_3[i], 0, 128);
+    }
+
+- reduce function
+    can be parallized
+
+    // eg calculate sum of a vector
+    // eg for calculating the mean time of a type of process
+    // parameters: vector_start, vector_end
+    int sum_vector_a = std::reduce(vector_a.begin(), vector_a.end());
+
+    // parameters: vector_start, vector_end, value_start
+    // slower than reduce function - but more features
+    int sum_vector_a = std::accumulate(vector_a.begin(), vector_a.end(), 0);
+
+    // other functions instead of sum
+    int sum_vector_a = std::accumulate(
+            vector_a.begin(), vector_a.end(), 0, std::multiplies<int>());
+
+- replace/shuffle
+
+    #include <algorithm>
+
+    // replace values in a vector: value 0 to value 1
+    std::replace(vector_a.begin(), vector_a.end(), 0, 1)
+
+    // shuffle values in a vector
+    std::shuffle(vector_a.begin(), vector_b.end(), std::default_random_engine);
+
+- return min and max values for specific data types
+
+    // i/o manipulators:
+    // std::dec std::hex switch to display-mode
+    // std::showbase show the base before
+
+    cout << endl << "MIN: " << endl;
+    cout
+    << "short: " << std::dec << std::numeric_limits<short>::min()
+    << " or " << std::hex << std::showbase << std::numeric_limits<short>::min() << '\n'
+
+    << "int: " << std::dec << std::numeric_limits<int>::min() << std::showbase
+    << " or " << std::hex << std::numeric_limits<int>::min() << '\n' << std::dec
+
+    << "float: " << std::numeric_limits<float>::min()
+    << " or " << std::hexfloat << std::numeric_limits<float>::min() << '\n'
+
+    << "double: " << std::defaultfloat << std::numeric_limits<double>::min()
+    << " or " << std::hexfloat << std::numeric_limits<double>::min() << '\n';
+
+    cout << endl << "MAX: " << endl;
+    cout
+    << "short: " << std::dec << std::numeric_limits<short>::max()
+    << " or " << std::hex << std::showbase
+    << std::numeric_limits<short>::max() << '\n'
+
+    << "int: " << std::dec << std::numeric_limits<int>::max() << std::showbase
+    << " or " << std::hex << std::numeric_limits<int>::max() << '\n' << std::dec
+
+    << "float: " << std::numeric_limits<float>::max()
+    << " or " << std::hexfloat << std::numeric_limits<float>::max() << '\n'
+
+    << "double: " << std::defaultfloat << std::numeric_limits<double>::max()
+    << " or " << std::hexfloat << std::numeric_limits<double>::max() << '\n';
+
+- numeric limits
+  calculate with infinitessimal concept
+   
+    // check wether two values are nearly the same
+    // with an upper limit ulp
+    typedef std::numeric_limit <double> lim;
+    bool is_nearly_the_same = std::abs(x - y) <= lim::epsilon() * std::abs(x +y) * ulp
+
+# chapter 8 - objects introduction
+
+- classes: instruction to save data + logic
+  objects are instances of a class
+  classes have its own namespace
+  constructor: create new object
+  destructor: destroy object - deconstruct and delete
+  inheritance: subclasses - animal > mammal > dog
+
+  body and header file for a class
+  header: declare class, function, member variables
+  cc/cpp: define them
+
+    // Image.h
+    class Image
+    {
+    public: // can be accessed
+        //constructor - no return value!
+        Image();
+        Image(const unsigned int &width, const unsigned int &height);
+
+        //destructor - no return value! don't need to declare/define!
+        ~Image();
+
+    private:
+        unsigned int m_width; //m_ for member!
+        unsigned int m_height; //m_ for member!
+    };
+
+    // Image.cc
+    #include "Image.h"
+
+    //constructor
+    Image::Image()
+    {
+        m_width = 0;
+        m_height = 0;
+    }
+    Image::Image(const unsigned int &width, const unsigned int &height)
+    {
+        m_width = width;
+        m_height = height;
+        cout << "image created with width: " << width << " and height: " << height << endl;
+    }
+
+    //destructor
+    Image::~Image()
+    {
+        cout << "image destroyed." << endl;
+    }
+
+    // Main.cc
+    { //new scope
+        Image img(100,400);
+    } // will be created and destroyed immediately
+
+- initializer list
+  set constant member variables before constructor
+  since can't do in constructor - is already initialized
+  for that initializer list
+  important: compiler sets variables in order of .h not .cc!
+
+    Image::Image(const unsigned int &width, const unsigned int &height) :
+        m_width(width), m_height(height)
+    {
+        cout << "image created with width: " << width << " and height: " << height << endl;
+    }
+    
+- member functions
+  include declaration in Image.h (public/private)
+  include definition in Image.cc -> prefix Image::
+  access public member functions via point syntax: img.save_image("img.bmp");
+
+- getter/setter
+  don't declare member variables as public 
+  to set/get a variable has to ferfill some logic!
+  therefore use setter/getter functions
+    
+    //declare in Image.h
+    unsigned int get_width() const; // object called by these functions cannot be modified
+    unsigned int get_height() const;
+    
+    void set_width(unsigned int new_width);
+    void set_height(unsigned int new_height);
+
+    //define in Image.cc
+    unsigned int Image::get_width() const
+    {
+        return m_widht; 
+    }
+    
+    unsigned int Image::get_height() const
+    {
+        return m_height;
+    }
+    
+    void Image::set_width(unsigned int new_width)
+    {
+        m_width = new_width;
+    }
+    
+    void Image::set_height(unsigned int new_height)
+    {
+        m_height = new_height;
+    }
+    
+    //access in main()
+
+    img.set_width(1000);
+    cout << img.get_width() << endl;
+
+  question: 
+  - do you need them for this specific class?
+  - do users may access/set variables?
+  - will setting without any consequences result in some conflicts?
+
+- inheritance - from more general class - animal > dog
+  encapsulate common properties in parental class
+  these properties inherited to child class
+  in addition specific properties in subclass/child class
+  create files .h and .cc
+  
+    // _________________________
+    // Animal.h
+    #pragma once
+    #include <string>
+
+    class Animal
+    {
+    public:
+        Animal(const std::string &name);
+        ~Animal(); // empty body
+        std::string get_name() const;
+        void get_type() const;
+        virtual void eating() const; //call child function if existing
+    private:
+        std::string m_name;
+    };  
+
+    // _________________________
+    // Animal.cc
+    #include <iostream>
+    #include "Animal.h"
+    
+    Animal::Animal(const std::string &name)
+        m_name(name)
+    {
+         std::cout << "animal constructed: " << m_name << std:endl;
+    }
+
+    Animal::~Animal()
+    {
+         std::cout << "animal destructed: " << m_name << std:endl;
+    }
+
+    void Animal::get_type() const
+    {
+        std::cout << "this is an animal!" << std::endl;
+    }
+
+    std::string Animal::get_name() const
+    {
+        return m_name;
+    }
+
+    void Animal:eating() const
+    {
+        std::cout << "anímals eat when hungry" << std::endl;
+    }
+
+    // _________________________
+    // Dog.h
+    #pragma once
+    #include "Animal.h"
+
+    class Dog: public Animal // inherit from Animal, access all public member variables
+    {
+    public:
+        Dog(const std::string &name, const bool &is_pet);
+        ~Dog();
+        void get_type() const;
+        void eating() const;
+    private:
+        bool m_is_pet;
+    };
+
+    // _________________________
+    // Dog.cc
+    #include <iostream>
+    #include "Dog.h"
+    
+    Dog::Dog(const std::string &name, const bool &is_pet)
+        Animal(name), m_is_pet(is_pet) // important: parent constructor first!!
+    {
+         std::cout << "dog constructed: " << m_name << std:endl;
+    }
+
+    Dog::~Dog()
+    {
+         std::cout << "dog destructed: " << m_name << std:endl;
+    }
+
+    void Dog::get_type() const; // "overwriting" the member function -> must declare in .h
+    {
+        std::cout << "this is a dog!" << std::endl;
+    }
+
+    void Dog::eating() const 
+    { 
+        std::cout << "dogs eat bones" << std::endl;
+    }
+
+    // _________________________
+    // main.cc
+
+    #include <iostream>
+    #include <string>
+
+    #include "Animal.h"
+    #include "Dog.h"
+
+    Animal animal_1("pussy"); // animal constructor 
+    animal_1.get_type();
+
+    Dog dog_1("doggy", true); // animal and dog constructor
+    dog_1.get_type();
+
+- polymorphism - virtual methods
+  constructors can't be virtual
+  destructors CAN be!
+  use: writing a fct with Param Obj of Class and Subclasse
+       without need of overwriting for each Subclass
+       example here: eatingPoly(Animal &animal)
+  
+    void eatingPoly(Animal &animal)
+    {
+        animal.eating();
+    }
+
+    // want the object execute the most specific function
+    // this is due to virtual keyword in Animal.h
+    eatingPoly(animal_1);
+    eatingPoly(dog_1); runs dog's function since virtual
+
+    // create pointer and allocate new Object
+    // therefore use -> instead of .
+    // problem:
+    Animal* animal_1 = new Animal("pussy");
+    animal_1->get_type(); // animal
+    delete animal_1; // animal destructor
+
+    Dog* dog_1 = new Dog("worf", true);
+    dog_1->get_type(); // dog
+    delete dog_1; // animal and dog destructor
+
+    Animal* dog_2 = new Dog("snuff", true); // pointer works for all subclasses
+    dog_2->get_type(); // animale -> PROBLEM
+    delete dog_2; // only animal destructor!!! specific dog stuff stays in heap
+    // leads to "undefined behavior"
+
+    // solution: set destructor to virtual!
+
+    // problem:
+    void eatingPoly(Animal* &animal)
+    {
+        animal.eating();
+    }
+
+    eatingPoly(animal_1); // works well
+    eatingPoly(dog_1); // doesnt work well
+    eatingPoly(dog_2); // works well
+    // solution: always pass param as the base class
+
+- function templates
+  use: when overloading a function
+  compiler decides, what types matches for this function
+  compiler replaces T for a matching type
+  here: int, double, ...
+    
+    template <typename T> 
+    T max(T &a,m T &b)
+    {
+        if (a < b)
+        {
+            return b;
+        }
+        else
+        {
+            return a;
+        }
+    }
+
+    template <typename T, typename U> // multiple varialbes possible
+    ...
+
+- variadic templates
+  for recursive functions
+
+    template <typename T>
+    T concat(T first)
+    {
+        return first; // for the last step
+    }
+
+    template <typename T, typename... Args>
+    T concat(T first, Args... args)
+    {
+        return first + concat(args...); // recursive call
+    }
+
+    // strings:
+    std::string s1 = "ha";
+    std::string s2 = "ll";
+    std::string s3 = "o";
+    std::cout << concat(s1, s2, s3) << std::endl; // "hallo"
+
+    // numbers
+    td::cout << concat(1, 2, 3) << td::endl; // "6"
+
+- class templates
+  con: template class member functions can't be virtual!
+  
+    // Statistic.h - for int/double/...
+    template <typename T>
+    class Statistic
+    {
+    public:
+        Statistic<T>();
+        ~Statistic<T>();
+
+        T get_min() const;
+        T get_max() const;
+        double get_mean() const;
+        void push_next_sample(T value);
+        void print_data();
+
+    private:
+        T m_min;
+        T m_max;
+        double m_mean;
+        int m_num_samples;
+        vector<T> m_samples;
+    };
+
+    // Statistic.cc
+    
+    //...
+    Statistic<T>::Statistic() : // important, include <T> in name scope!!!
+        m_min(0), m_max(0), m_num_samples(0),
+        m_mean(0.0), m_samples(0, 0)
+    {
+    }
+    //...
+
+    // Main()
+
+    Statistic<float> stat_1; // declare object with type! 
+
+    // examples
+    std::vector<int> my_vector_1;
+
+- metaprogramming
+  calculated by compiler
+
+    // calculating faculty n!
+    template <const int n>
+    class faculty
+    {
+    public:
+        static const int val = faculty<n-1>::val + n;
+    };
+
+    template<>
+    {
+        static const int val = 1;
+    };
+
+    // main()
+    std:cout << "5! = " << faculty<5>::val << std::endl;
+
+- overloading operators
+  matrix AB
+         CD
+
+    // Matrix.h
+    
+    public:
+        //...
+        // new functionality for "+"
+        Matrix operator+(const Matrix &matrix_b);
+        Matrix& operator+=(const Matrix &matrix_b);
+        Matrix operator-(const Matrix &matrix_b);
+        Matrix& operator-=(const Matrix &matrix_b);
+
+    // Matrix.cc
+    
+    //...
+    Matrix Matrix::operator+(const Matrix &matrix_b)
+    {
+        result.set_A(get_A() + matrix_b.get_A());
+        result.set_B(get_B() + matrix_b.get_B());
+        result.set_C(get_C() + matrix_b.get_C());
+        result.set_D(get_D() + matrix_b.get_D());
+    }
+
+    Matrix& Matrix::operator+=(const Matrix &matrix_b)
+    {
+        set_A(get_A() + matrix_b.get_A());
+        set_B(get_B() + matrix_b.get_B());
+        set_C(get_C() + matrix_b.get_C());
+        set_D(get_D() + matrix_b.get_D());
+        return *this;
+    }
+
+    Matrix Matrix::operator-(const Matrix &matrix_b)
+    {
+        // dito
+    }
+
+    Matrix& Matrix::operator-=(const Matrix &matrix_b)
+    {
+        // dito
+    }
+
+    // Main()
+
+    Matrix m3 = m1 + m2;
+
+- operators in c++
+  https://en.cppreference.com/w/cpp/language/operator_precedence
+
+- random number generator RNG class...
+
+
+
+
+
+
+
+
 
 
 
