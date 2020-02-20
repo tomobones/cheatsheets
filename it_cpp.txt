@@ -1691,7 +1691,7 @@ ________________________________
     #include "Image.h"
 
     //constructor
-    Image::Image()
+    Image::Image() // now include name scope > can access member variabes ec
     {
         m_width = 0;
         m_height = 0;
@@ -2005,11 +2005,16 @@ ________________________________
     // Statistic.cc
     
     //...
+    template<typename T>
     Statistic<T>::Statistic() : // important, include <T> in name scope!!!
         m_min(0), m_max(0), m_num_samples(0),
         m_mean(0.0), m_samples(0, 0)
     {
+        // code
     }
+    // important: also replace in parameters and return values
+    // of the int/double with T
+    // of the Statistic with Statistic<T>
     //...
 
     // Main()
@@ -2055,6 +2060,8 @@ ________________________________
     // Matrix.cc
     
     //...
+    // here returnvalue is just value
+    // don't need reference here
     Matrix Matrix::operator+(const Matrix &matrix_b)
     {
         result.set_A(get_A() + matrix_b.get_A());
@@ -2063,6 +2070,9 @@ ________________________________
         result.set_D(get_D() + matrix_b.get_D());
     }
 
+    // returnvalue as reference here!
+    // want to pass new value to object here: m1 += m2
+    // need "write rights" here
     Matrix& Matrix::operator+=(const Matrix &matrix_b)
     {
         set_A(get_A() + matrix_b.get_A());
@@ -2090,6 +2100,134 @@ ________________________________
   https://en.cppreference.com/w/cpp/language/operator_precedence
 
 - random number generator RNG class...
+
+- lambda expressions
+  expressions in function calls
+  closure: runtime object of lambda expression
+  in this example: 3ed parameter of find_if
+  syntax: [capture clause] (parameters) -> run-type {body}
+  [](){}
+
+    std::vector<int> container(10, 5);
+    std::find_if(container.begin(), container.end(),
+        [](int val) { return 0 < val && val < 10; });
+
+  capture: arguments for the lambda expression
+  pass values/objects into body with certain properties
+  - &: automatic call by reference call
+  - =: automatic call by value call
+  - this: call of the actual object
+
+  return type optional: eg "-> int"
+
+  pros:
+  - shorter, more readable
+  - lightweight function in-place > local
+
+- lambda expression - examples
+
+    #include <algorithm>
+    #include <numeric>
+
+    std::vector<int> my_vector(10, 0)
+    std::iota(my_vector.begin(), my_vector.end(), 0):
+    for (const auto &val : my_vector)
+    {
+        std::cout << val << std::endl;
+    }
+    std::vector<int> my_result_1(10, 0);
+    std::vector<int> my_result_2;
+
+    // transform: true/false, if entry even/odd
+    // important: really save return value!
+    std::transform(my_vector.begin(), my_vector.end(), my_result_1.begin(),
+        [](int value) -> int {if (value % 2 == 0) return true; else return false;}) 
+    for (const auto &val : my_result_1)
+    {
+        std::cout << val << std::endl;
+    }
+
+    // copy_if: saves value in my_result_2
+    // for even/odd numbers from my_vector
+    // important: saves value for return value true!
+    std::copy_if(my_vector.begin(), my_vector.end(),
+        std::back_inserter(my_result_2), 
+        [](int value) -> int {if (value % 2 == 0) return true; else return false;}) 
+    for (const auto &val : my_result_2)
+    {
+        std::cout << val << std::endl;
+    }
+
+    // remove_if: remove all values > 5 from my_vector
+    // important: removes value at return value true
+    my_vector.erase(
+        std::remove_if(my_vector.begin(), my_vector.end(),
+            [](int value) -> int {if (value > 5) return true; else return false;}),
+        my_vector.end());
+    for (const auto &val : my_vector)
+    {
+        std::cout << val << std::endl;
+    }
+
+    // remove_if: remove all values > 3 from my_vector
+    // important: removes value at return value true
+    int upper_bound = 3;
+    my_vector.erase(
+        std::remove_if(my_vector.begin(), my_vector.end(),
+            [&upper_bound](cont int &value) -> int {
+                if (value > upper_bound) return true; else return false;}), 
+        my_vector.end()); 
+    for (const auto &val : my_vector) 
+    { 
+        std::cout << val << std::endl;
+    }
+
+    // replace_if: all values 2 -> value 42
+    // important: replaces values at return value true
+    int upper_bound = 3;
+    std::remove_if(my_vector.begin(), my_vector.end(),
+        [](cont int &value) -> int {return (value == 2);}), 42);
+    for (const auto &val : my_vector) 
+    { 
+        std::cout << val << std::endl;
+    }
+
+    // sorting
+    auto sorting = [](const auto &val1, const auto &val2) {return val1 > val2};
+    std::sort(my_vector.begin(), my_vector.end(), sorting);
+
+    // alternatively (better since in-place)
+    std::sort(my_vector.begin(), my_vector.end(),
+        [](const auto &val1, const auto &val2) {return val1 > val2});
+    for (const auto &val : my_vector) 
+    { 
+        std::cout << val << std::endl;
+    }
+        
+    // non_of - here: has no even value
+    bool has_no_even = std::none_of(
+        my_vector.begin(), my_vector.end(),
+        [](int val) {return(val % 2 == 0);});
+    // is false of lambda fct returns true one time!
+    // alternatively: any_of
+
+
+- map-reduce idiom
+  
+    double magnitude(std::vector<double &vec)
+    {
+        std::transform(vec.begin(), vec.end(), vec.begin(),
+            [](double val) {return val * val;});
+        return std::pow(std::accumulate(vec.begin(), vec.end(), 0.0), 0.5);
+    }
+
+    // Main
+    std::vector<double> data(5, 0);
+    std::iota(data.begin(), data.end(), 0); // 0,1,2,3,4
+    std::cout << magnitude(data) << std::endl;
+
+# chapter 11 - move and copy constructor
+
 
 
 
