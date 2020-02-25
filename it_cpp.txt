@@ -13,7 +13,7 @@ notes
 - container, data structure, algorithms
 - polymorphism, virtual, pointer, Animal dog = Dog(...)
   Animal* dog_2 = new Dog("snuff", true);
-
+- move/copy assigment/constructor > RValues
 
 ________________________________
 # chapter 1 - introduction
@@ -2228,24 +2228,387 @@ ________________________________
 
 # chapter 11 - move and copy constructor
 
+- rule of five: need one > implement all 5!
+  eg for matrix class, which has a pointer as member variable!
+  1 copy constructor
+  2 destructor (user defined) - only if we alloc memory on heap <> use pointers
+  3 copy assignment operator
+  4 move constructot
+  5 move assignment operator
+  see eg http://www.cplusplus.com/reference/vector/vector/vector
 
+- assignment constructor/operator
 
+    // want o copy of an object
+    DynamicArray<double> a(1, 3);
+    DananicArray<double> b(a); // copy assignment constructor 
+    DananicArray<double> c = a; // copy assignment operator
 
+    // DynamicArray.h
+    public:
 
+        DynamicArray<T>(); default constructor
+        DynamicArray<T>(const T &value, const unsigned int &length); // user def constructor
+        ~DynamicArray<T>(); // user def constructor
 
+        DynamicArray<T>(const DynamicArray<T> &x); // copy constructor
+        DynamicArray<T>& operator=(DynamicArray<T> x); // copy assigment operator
 
+    // DynamicArray.cc
 
+    // ... constructors ...
 
+    template<typename T>
+    DynamicArray<T>::~DynamicArray()
+    {
+        delete[] m_data;
+        m_data = nullptr;
+    }
+    
+    template<typename T>
+    DynamicArray<T>::DynamicArray<T>(const DynamicArray<T> &x)
+        m_length(x.m_length), m_data(new T[m_length])// initializer list - important: order!
+    {
+        for (int i = 0; i != m_length; ++i)
+        {
+            m_data[i] = x.m_data[i]; // copying the values
+        }
+    }
+ 
+    template<typename T>
+    DynamicArray<T>::DynamicArray<T>& operator=(DynamicArray<T> x) // no ref!!!
+    {
+        // want c = a 
+        // swap fct swaps values - since local copy, doesn't matter
+        std::swap(m_length, x.m_length);
+        std::swap(m_data, x.m_data);
+        return *this;
+    } 
 
+    // Main()
+    DynamicArray<double> a(1, 3);
+    cout << "adress a: " << &a << endl; // all 3 objs have diff addresses!
+    for (int i = 0; i != 3; ++i)
+    {
+        cout << a[i];
+    }
+    cout << endl;
 
+    DynamicArray<double> b(a);
+    cout << "adress b: " << &b << endl;
+    for (int i = 0; i != 3; ++i)
+    {
+        cout << b[i];
+    }
+    cout << endl;
 
+    DynamicArray<double> c = a;
+    cout << "adress c: " << &c << endl;
+    for (int i = 0; i != 3; ++i)
+    {
+        cout << c[i];
+    }
+    cout << endl;
 
+- move constructor/operator
+  & := Lvalue Reference
+  && := Rvalue Reference
+  Rvalue: temp memory
+  Move: steals memory of the Rvalue since value would be redundant in memory
+  int a = 1 + 2; right side is Rvalue
+    // DynamicArray.h
+    public:
 
+        DynamicArray<T>(); default constructor
+        DynamicArray<T>(const T &value, const unsigned int &length); // user def constructor
+        ~DynamicArray<T>(); // user def constructor
 
+        DynamicArray<T>(const DynamicArray<T> &x); // copy constructor
+        DynamicArray<T>(const DynamicArray<T> &&x); // move constructor
+        DynamicArray<T>& operator=(DynamicArray<T> &&x); // move assigment operator
 
+    // DynamicArray.cc
 
+    template<typename T>
+    DynamicArray<T>::DynamicArray<T>(const DynamicArray<T> &&x) 
+        m_length(std::move(x.m_length)), m_data(std::move(x.m_data))
+    {
+        x.m_length = 0;
+        x.m_data = nullptr;
+    }
 
+    template<typename T>
+    DynamicArray<T>::DynamicArray<T>& operator=(DynamicArray<T> &&x) 
+    {
+        delete[] m_data;
+    
+        m_length = std::move(x.m_length);
+        m_data = std::move(x.m_data);
 
+        x.m_length = 0;
+        x.m_data = nullptr;
+        
+        return *this;
+    }
 
+    // Main()
+    // check values and adresses as above...
+
+- smart pointer
+
+  c++ has no automatic garbage collection on heap
+  on every "new" must follow a "delete"
+  error-prone programming with pointers
+
+  smart pointer: control life time of objects
+  control "new" and "delete" themselves
+  less error-prone
+
+  smart pointers follow raii
+  "resource acquisition is initialization"
+  ressource allocation coupled to life duration of objects 
+  constructor: allocates ressource
+  destructor: deallocates ressource
+
+  several kinds: unique/shared/weak pointers
+
+- unique pointers:
+  shared pointers: posess a reference counting system
+
+    #include <iostream>
+    #include <memory>
+
+    class ScopeTest
+    {
+    public:
+        ScopeText(int val) : m_val(val)
+        {   
+            std::cout << "constructor called: " << m_val << std::endl;
+        }
+
+        ~ScopeTest()
+        {
+            std::cout << "destructor called" << std::endl;
+        }
+
+        void test()
+        {
+            std::cout << "test function called" << std::endl;
+        }
+    private:
+        int m_val;
+    };
+    
+    void f1() // to enter and exit a scope
+    {
+        // create unique pointer
+        std::unique_ptr<ScopeTest> t1 = std::make_unique<ScopeTest>(10);
+        t1->test();
+    }
+
+    void f2()
+    {
+        ScopeTest *t2 = new ScopeTest(10);
+        t2->test();
+    }
+
+    void f3()
+    {
+        // create shared pointer
+        std::shared_ptr<ScopeTest> t3 = std::make_shared<ScopeeTest>(10);
+        t3->test();
+
+        // print counting
+        std::cout << "count: " << t3.use_count() << std::endl;
+
+        {
+            // create copy of t3
+            std::shared_ptr<ScopeTest> t4 = t3;
+
+            // print counting
+            std::cout << "count: " << t3.use_count() << std::endl;
+        }
+
+        // print counting - count=0 > destructor is finally called
+        std::cout << "count: " << t3.use_count() << std::endl;
+    }
+
+    int main()
+    {
+        f1(); // destructur is called
+        f2(); // no destructor is called
+        f3();
+
+        return 0;
+    }
+
+    
+    // problem/warning of shared pointer: circular reference
+    // if in obj1 ex a member var pointing to obj2
+    // and in obj2 ex a member var pointing to obj1
+    // for each obj ex (at least) two references
+    // no destructor called when leaving the scope
+    // solution: weak pointer
+
+- weak pointer - does not increase reference count
+  con: can't use weak pointers directly
+
+    std::weak_ptr<ScopeTest> m_partner;
+    t5->m_partner->test(); // doesn't work
+
+    // trick: convert weak ptr into shared ptr
+    std::shared_ptr<ScopeTest> shared_t5_partner = t5->m_partner.lock()
+    shared_t5_partner->test();
+
+- threading
+  parallel working with data in program
+  parallel computation on cpu/gpu possible > here cpu > later openMP
+  gpu > cuda/opencl/opengl
+  - multiprocessing:
+    each process has own thread, 
+    has an interface for communication
+  - mutlithreading:
+    each process has several threads, 
+    communicates over shared memory
+  consider:
+  - how to access data parallel?
+  - when must a thread be started?
+  - which processes are paralizable?
+
+    #include <thread>
+    void print_text1()
+    {
+        cout << "thread executed.\n" << endl;
+    }
+
+    void print_text2(int number)
+    {
+        cout << "thread executed.\n" << endl;
+        number ++;
+    }
+
+    void print_text3(int &number)
+    {
+        cout << "thread executed.\n" << endl;
+        number ++;
+    }
+
+    int main()
+    {
+        // create threads (apart from main-thread)
+        std::thread t1(print_text);
+        std::thread t2(print_text);
+
+        // join
+        if(t1.joinable())
+            t1.join();
+        if(t2.joinable())
+            t2.join();
+
+        // detach - will not be joined back anymore
+        t1.detach();
+        t2.detach();
+        
+        // pass functions parameter
+        int n1 = 12;
+        int n2 = 24;
+
+        std::thread t3(print_text2, n1);
+        std::thread t4(print_text2, n2);
+
+        if(t3.joinable())
+            t3.join();
+        if(t4.joinable())
+            t4.join();
+        
+        // just print 12 and 24 sind local copies
+        cout << endl << "n1: " << n1 << "\n";
+        cout << endl << "n2: " << n2 << "\n";
+
+        // passing refereces
+        int n1 = 12;
+        int n2 = 24;
+
+        std::thread t3(print_text3, &n1);
+        std::thread t4(print_text3, &n2);
+        // alterantively
+        std::thread t3(print_text3, std::ref(n1));
+        std::thread t4(print_text3, std::ref(n2));
+
+        if(t3.joinable())
+            t3.join();
+        if(t4.joinable())
+            t4.join();
+        
+        cout << endl << "n1: " << n1 << "\n";
+        cout << endl << "n2: " << n2 << "\n";
+
+        // check number of possible threads
+        unsigned int possible_threads = std::thread::hardware_concurrency();
+        cout << endl << "number of possible threads: " << possible_threads;
+
+        // thread id
+        std::thread::id main_thread_id = std::this_thread::get_id();
+        cout << endl << "thread id of main: " << main_thread_id;
+
+- exceptions
+  use: when there is influence from "outside" that may cause problems
+
+    #include <exceptions>
+
+    double div(double a, double b)
+    {
+        if (b == 0.0)
+        {
+            throw "division by zero!";
+        }
+        return a/b;
+    }
+
+    int main()
+    {
+        double x = 10.0;
+        double y = 0.0;
+        double z = 0.0;
+
+        try
+        {
+            z = div(x, y);
+            std::cout << z << std::endl;
+        }
+        catch(const char *msg)
+        {
+            std::cerr << msg << std::endl
+        }
+
+        cin.get();
+        getchar();
+        return 0;
+    } 
+
+- exception examples
+
+    // matrix class + operator
+    Matrix<T> Matrix<T>::operator+(const Matrix &matrixB)
+    {
+        try
+        {
+            if (this->m_rows != matrixB.m_rows)
+                throw(std::invalid_argument("numbers of rows are not equal"));
+            if (this->m_cols != matrixB.m_cols)
+                throw(std::invalid_argument("numbers of cols are not equal"));
+
+            Matrix<T> result(m_rows, m_cols);
+            for (int i = 0; i != m_rows; ++i)
+            {
+                // iteration and algo for sum
+            } 
+            return result;
+        }
+        catch (std::invalid_argument &err)
+        {
+            std::cerr << err.what() << std::endl;
+        }
+    }
 
 - end
